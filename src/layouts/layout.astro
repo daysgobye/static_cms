@@ -1,0 +1,29 @@
+---
+import Content from "@components/layout/content.astro";
+import Footer from "@components/layout/footer.astro";
+import Nav from "@components/layout/nav.astro";
+
+// const { title, meta, structuredData, lang = "en" } = Astro.props;
+
+// interface Props {
+//     title?: string;
+//     meta?: string;
+//     structuredData?: object;
+//     lang?: string;
+// }
+---
+
+<html lang="en">
+    <head>
+        <title></title>
+    </head>
+    <body>
+        <div class="min-h-screen flex flex-col">
+            <Nav />
+            <Content>
+                <slot />
+            </Content>
+            <Footer />
+        </div>
+    </body>
+</html>

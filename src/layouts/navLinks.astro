@@ -1,0 +1,41 @@
+---
+export type PageObject = {
+    title: string;
+    url: string;
+    btn?: boolean;
+    form?: boolean;
+};
+interface Props {
+    pages: PageObject[];
+}
+const { pages } = Astro.props;
+---
+
+<>
+    {
+        pages.map((linkData) => {
+            if (linkData.btn) {
+                return (
+                    <>
+                        <a class="btn btn-sm btn-primary" href={linkData.url}>
+                            {linkData.title}
+                        </a>
+                    </>
+                );
+            } else if (linkData.form) {
+                return (
+                    <form method="post" action={linkData.url}>
+                        <button class="btn btn-sm btn-primary">
+                            {linkData.title}
+                        </button>
+                    </form>
+                );
+            }
+            return (
+                <li>
+                    <a href={linkData.url}>{linkData.title}</a>
+                </li>
+            );
+        })
+    }
+</>

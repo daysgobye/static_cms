@@ -1,0 +1,17 @@
+---
+import Pricing from "@components/common/pricing/index.astro";
+import { getProducts } from "@lib/lemonSqueezy/utils";
+
+const plans = await getProducts();
+---
+
+<div>
+    <h1>Select you plan</h1>
+    <Pricing
+        plans={plans.map((plan) => ({
+            ...plan,
+            cta: "Sign up",
+            ctaLink: "/signup",
+        }))}
+    />
+</div>

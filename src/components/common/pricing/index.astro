@@ -1,0 +1,24 @@
+---
+import type { PricingCard } from "./card.astro";
+import Card from "./card.astro";
+
+interface Props {
+    plans: PricingCard[];
+}
+const { plans } = Astro.props;
+---
+
+<div class="flex flex-col gap-8 items-center" id="pricing">
+    <!-- Title -->
+    <div class="flex flex-col gap-2 text-center">
+        <h1 class="font-bold text-3xl">Pricing</h1>
+        <span>
+            Whatever your status, our offers evolve according to your needs
+        </span>
+    </div>
+
+    <!-- Pricing cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 items-start px-2 gap-8">
+        {plans.map((plan) => <Card {...plan} />)}
+    </div>
+</div>

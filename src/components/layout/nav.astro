@@ -1,0 +1,85 @@
+---
+import { Image } from "astro:assets";
+import logo from "@assets/logo.png";
+import NavLinks, { type PageObject } from "@layouts/navLinks.astro";
+const user = Astro.locals.user;
+const pages: PageObject[] = [
+    {
+        title: "Pricing",
+        url: "/#pricing",
+    },
+    {
+        title: "Docs",
+        url: "/docs",
+    },
+];
+if (user) {
+    pages.push(
+        {
+            title: "Account",
+            url: "/account",
+            btn: true,
+        },
+        {
+            title: "Log Out",
+            url: "/api/logout",
+            form: true,
+        },
+    );
+} else {
+    pages.push(
+        {
+            title: "Log In",
+            url: "/login",
+            btn: true,
+        },
+        {
+            title: "Sign up",
+            url: "/signup",
+            btn: true,
+        },
+    );
+}
+---
+
+<!-- Navbar -->
+<nav class="navbar justify-between bg-base-300">
+    <!-- Logo -->
+    <a class="btn btn-ghost text-lg" href="/">
+        <Image alt="Logo" src={logo} class="w-4" />
+        Company
+    </a>
+
+    <!-- Menu for mobile -->
+    <div class="dropdown dropdown-end sm:hidden">
+        <button class="btn btn-ghost">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h7"></path>
+                </svg>
+            </div>
+        </button>
+
+        <ul
+            tabindex="0"
+            class="dropdown-content menu z-[1] bg-base-200 p-6 rounded-box shadow w-56 gap-2"
+        >
+            <NavLinks pages={pages} />
+        </ul>
+    </div>
+
+    <!-- Menu for desktop -->
+    <ul class="hidden menu sm:menu-horizontal gap-2">
+        <NavLinks pages={pages} />
+    </ul>
+</nav>

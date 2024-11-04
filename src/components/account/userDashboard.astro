@@ -1,0 +1,13 @@
+---
+import SelectPlan from "@components/account/selectPlan.astro";
+import Layout from "@layouts/layout.astro";
+
+const user = Astro.locals.user;
+console.log(user);
+---
+
+<div>
+    <h2>
+        Welcom back {user?.email}
+    </h2>
+</div>

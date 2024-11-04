@@ -1,0 +1,25 @@
+---
+import Spacer from "@components/common/spacer.astro";
+import Faq from "@components/home/faq.astro";
+import HeroBtns from "@components/home/heroBtns.astro";
+import Pricing from "@components/common/pricing/index.astro";
+import Layout from "@layouts/layout.astro";
+import { getProducts } from "@lib/lemonSqueezy/utils";
+const plans = await getProducts();
+---
+
+<Layout>
+  <HeroBtns />
+  <Spacer />
+  <Faq />
+  <Spacer />
+
+  <Pricing
+    plans={plans.map((plan) => ({
+      ...plan,
+      cta: "Sign up",
+      ctaLink: "/signup",
+    }))}
+  />
+  <Spacer />
+</Layout>

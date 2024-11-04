@@ -1,0 +1,36 @@
+---
+import type { PopulatedProduct } from "@lib/lemonSqueezy/productInfo";
+
+export type PricingCard = PopulatedProduct & {
+    ctaLink: string;
+    cta: string;
+};
+interface Props extends PricingCard {}
+const { features, title, subTitle, price, cta, ctaLink } = Astro.props;
+---
+
+<div class="flex flex-col gap-6 bg-base-200 rounded-box p-8">
+    <div class="flex flex-col gap-4 text-center">
+        <h2 class="text-xl">{title}</h2>
+
+        <h1 class="text-5xl font-bold">
+            {typeof price === "string" ? price : `$${price.toLocaleString()}`}
+        </h1>
+
+        <span class="text-sm">{subTitle}</span>
+    </div>
+
+    <!-- Features -->
+    <div class="flex flex-col">
+        {
+            features.map((feature) => (
+                <div class="flex gap-2 items-center">
+                    <i class="fa-solid fa-check text-accent" />
+                    {feature}
+                </div>
+            ))
+        }
+    </div>
+
+    <a class="btn btn-neutral" href={ctaLink}>{cta}</a>
+</div>
