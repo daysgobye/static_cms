@@ -16,6 +16,8 @@ interface DatabaseUserAttributes {
     email: string;
     roll: UserRoll
     plan: UserPlan
+    githubId: number
+    installId: number | null
 }
 
 const adapter = new DrizzleSQLiteAdapter(db, session, user);
@@ -31,7 +33,9 @@ export const lucia = new Lucia(adapter, {
         return {
             email: attributes.email,
             roll: attributes.roll,
-            plan: attributes.plan
+            plan: attributes.plan,
+            githubId: attributes.githubId,
+            installId: attributes.installId
         };
     }
 });

@@ -1,1 +1,0 @@
-ALTER TABLE `user` ADD `plan` text DEFAULT 'null';

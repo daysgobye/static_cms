@@ -1,0 +1,23 @@
+---
+import { GhApp } from "@lib/github";
+
+const user = Astro.locals.user;
+let installationUrl = "";
+if (user && user.githubId) {
+    installationUrl = await GhApp.getInstallationUrl({
+        target_id: user.githubId,
+    });
+}
+---
+
+<div>
+    <h2>Next Step install Github App</h2>
+    <p>
+        when you click the button below you will install the app and please
+        select 'Only selected repos'
+    </p>
+    <p>then select the repos you want to use with flat cms</p>
+    <a href={installationUrl}>
+        <button class="btn btn-success"> install </button>
+    </a>
+</div>

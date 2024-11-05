@@ -22,7 +22,7 @@ export class BaseRepository<T extends AnySQLiteTable> {
     }
     async _update(id: string, data: any) {
         return await this.db.update(this.table)
-            .set({ ...data, updatedAt: sql`NOW()` })
+            .set({ ...data, updatedAt: Date.now() })
             //@ts-ignore
             .where(eq(this.table.id, id));
     }

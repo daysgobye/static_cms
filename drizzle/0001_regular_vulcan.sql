@@ -1,0 +1,1 @@
+ALTER TABLE `user` ADD `install_id` integer;

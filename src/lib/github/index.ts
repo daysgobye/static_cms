@@ -1,0 +1,39 @@
+import UserRepository from "@lib/entities/user/repository";
+import { User } from '@lib/entities/user/schema'
+import { App } from "@octokit/app";
+const appId = 1046024;
+export const GhApp = new App({
+    appId,
+    privateKey: `-----BEGIN RSA PRIVATE KEY-----
+MIIEowIBAAKCAQEAuOF+3CtOIRYWlzbUixzvXy1v3XCXOE2KTMltBpfK1IRWh2uZ
+OFQ0Xt4esTW/SCoHHOk2l5HfNyei7DIiGX26r6LaIY6exU68xrpbxiFMaj0D/wCU
+RoPKDJ7UlkPWrTeGPtGF1rBfuJoFJ9l1jGuLAGhqh2uAyUMWtpdtWGTxfw7M3Io5
+5UAFNuFC70zgO+ABwjDRG6OEG6aGaGK5mdD3A57lkAF1S3CRvWh3e7JI6Jr1YnRa
+U9usYIeFXHlS86JaiEUC86/WbldVx0ZdlVZEKM7L1W4W4NSB78ze/y2+bmIwJOdO
+nReNrynDcU3rAMPR8SARSsCzMXoCkD0sWjjwTwIDAQABAoIBAAoN2URH5pvOA7R9
+etmF3U6jve2g7dhV/ytl2NP+9TzRZZM/urlheued1LV2Ysyd3H0qAZoEiMsLEMUf
+hNM2Dyz2Aj7I7sF0Irf78nm33dv5LXp0oZukFxzQlmcFkWsiFd7crhaayNnVJmqg
+XNAiGREQnJp4siw/xcBwQ7YG50stfy5y9WH35Lm79he7O3pxBUxwl+6KrouMQa6p
+n1IhGXnRnXCJbT6aV77rt2N6xKj57Q3CQsUnG+sX0mWWxACL+IxTg4ghNtG1KSsb
+K55RRIxsgF+LGOHuCBtaaKFhP3Uvo/0EHg5rBbYYxObmHEZLzqGg/vAklwfbEE5J
+9xeiwmECgYEA4/RMZRQKufc+RkFNLhGAuHbKprReRxlljKvQucfuUO+7lYbVlLH8
+jA9V36tSJkvrxC5t/VWoZJSFhE5qwxijGe+nEpmZHXeNdN4XyOt9Nh8qSQGpDORH
+jYew3Cvclgx5UKOdkPbOr0hS7jw60V16bgY/hjY5FxrGAq1zbQyZGOUCgYEAz6CL
+tNu/TNsGstxy95N+n2KJMRLmDuC5RfQSkztM/BA31liNb/gCpnyxUFRi/5PhCiaR
+9izl6kKwTISitBtbsKDx2Ie3+7L7qk0k503Xsx+wzvaSulNmBUJKRTYE9Vo3g4Qn
+VE8mYaAf4ikUBX8UK4AFkQg1fwmflqFnYqwE1SMCgYA0/qKUDSjBOx2bL6tFvoPy
+XouWXfBdDyZwobEQv85Durgddw9IVmikFxybtzSN+rCBF1oyvys61tyDeceQO7YP
+XYu140eZdiXIualF6Jlfb7dg6aXnfVq1KIqRZREPQS8i9Ca5gOdkEKhXAmGaMuU3
+lvRFu21iVbMbBEAFZhxhkQKBgHgHiRx6OUJ2EI5QMUp9AyOjNEqhcUxCj/kn26Ew
+FBZYTd9lfAax6t5SkbMtxbmYxO04VQNq+1ONUBw8RU83za7zrDyQYUVqOGFAjcgG
+UV9lP7K2CycaVY1OwF74lq88g4FNYes0gqzHhAcb1k5DI+bt8MniZALYDmFnV7xM
+U9LfAoGBAMeo/grXBiV/f9l5YLsUzs/0DlDXy4dOisl6wa4WkfWJoUZVLWKCSafc
+VKDztO87bZ0bSRV8BjqLmBB+O2pjNG3p6ulPK5T+Asu6V6S+yIIQwxE8phYmq3Ed
+Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
+-----END RSA PRIVATE KEY-----
+`,
+    oauth: {
+        clientId: import.meta.env.GITHUB_CLIENT_ID,
+        clientSecret: import.meta.env.GITHUB_CLIENT_SECRET,
+    },
+});

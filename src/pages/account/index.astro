@@ -1,11 +1,57 @@
 ---
+import InstallApp from "@components/account/installApp.astro";
+
 import SelectPlan from "@components/account/selectPlan.astro";
 import UserDashboard from "@components/account/userDashboard.astro";
 import Layout from "@layouts/layout.astro";
+import { GhApp } from "@lib/github";
 
 const user = Astro.locals.user;
+
+if (user && user.installId) {
+    console.log(user);
+    const octokit = await GhApp.getInstallationOctokit(user.installId);
+
+    const repos = await octokit.request("GET /installation/repositories", {
+        headers: {
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    });
+
+    const repo = repos.data.repositories.filter(
+        (repo) => repo.name === "balatzee",
+    )[0];
+    console.log(repo);
+    if (repo) {
+        const contents = await octokit.request(
+            "GET /repos/{owner}/{repo}/contents/{path}",
+            {
+                owner: repo.owner.login,
+                repo: repo.name,
+                path: "/src",
+                headers: {
+                    "X-GitHub-Api-Version": "2022-11-28",
+                },
+            },
+        );
+        console.log(contents);
+    }
+} else {
+    console.log("missing");
+    console.log(user);
+}
 ---
 
 <Layout>
-    {user && user.plan ? <UserDashboard /> : <SelectPlan />}
+    {
+        user && user.installId ? (
+            user && user.plan ? (
+                <UserDashboard />
+            ) : (
+                <SelectPlan />
+            )
+        ) : (
+            <InstallApp />
+        )
+    }
 </Layout>

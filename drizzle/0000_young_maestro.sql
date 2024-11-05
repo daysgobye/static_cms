@@ -9,13 +9,17 @@ CREATE TABLE `session` (
 );
 --> statement-breakpoint
 CREATE TABLE `user` (
+	`github_id` integer,
+	`username` text,
 	`email` text,
 	`password_hash` text NOT NULL,
 	`roll` integer DEFAULT 1,
+	`plan` text,
 	`id` text PRIMARY KEY NOT NULL,
 	`metadata` text,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP),
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `user_github_id_unique` ON `user` (`github_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);

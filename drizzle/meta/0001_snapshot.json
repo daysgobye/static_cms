@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "89a4376b-757e-4ea1-b642-dcf0727405eb",
-  "prevId": "38d5ba10-c756-46b0-a860-aeabaeaf5bd0",
+  "id": "6aa921ef-5605-4a57-a8a2-f9e79baf97f9",
+  "prevId": "052878a4-c79a-43b6-8f18-b480c611d7ed",
   "tables": {
     "session": {
       "name": "session",
@@ -74,6 +74,27 @@
     "user": {
       "name": "user",
       "columns": {
+        "github_id": {
+          "name": "github_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "install_id": {
+          "name": "install_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "email": {
           "name": "email",
           "type": "text",
@@ -101,8 +122,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "'null'"
+          "autoincrement": false
         },
         "id": {
           "name": "id",
@@ -136,6 +156,13 @@
         }
       },
       "indexes": {
+        "user_github_id_unique": {
+          "name": "user_github_id_unique",
+          "columns": [
+            "github_id"
+          ],
+          "isUnique": true
+        },
         "user_email_unique": {
           "name": "user_email_unique",
           "columns": [
