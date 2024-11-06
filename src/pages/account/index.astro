@@ -9,32 +9,17 @@ import { GhApp } from "@lib/github";
 const user = Astro.locals.user;
 
 if (user && user.installId) {
+    const ghApp = new GhApp(user.installId);
     console.log(user);
-    const octokit = await GhApp.getInstallationOctokit(user.installId);
+    const octokit = await ghApp.app.getInstallationOctokit(user.installId);
 
-    const repos = await octokit.request("GET /installation/repositories", {
-        headers: {
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    });
-
-    const repo = repos.data.repositories.filter(
-        (repo) => repo.name === "balatzee",
-    )[0];
-    console.log(repo);
+    const repo = await ghApp.getRepo("balatzee");
     if (repo) {
-        const contents = await octokit.request(
-            "GET /repos/{owner}/{repo}/contents/{path}",
-            {
-                owner: repo.owner.login,
-                repo: repo.name,
-                path: "/src",
-                headers: {
-                    "X-GitHub-Api-Version": "2022-11-28",
-                },
-            },
-        );
-        console.log(contents);
+        console.log("--------------------contents-------------------");
+        const tree = await ghApp.getTree(repo);
+        //@ts-ignore
+        const file = await ghApp.getFileContent(tree.children["todo.md"], repo);
+        console.log(file);
     }
 } else {
     console.log("missing");

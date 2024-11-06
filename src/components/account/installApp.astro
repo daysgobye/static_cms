@@ -4,9 +4,8 @@ import { GhApp } from "@lib/github";
 const user = Astro.locals.user;
 let installationUrl = "";
 if (user && user.githubId) {
-    installationUrl = await GhApp.getInstallationUrl({
-        target_id: user.githubId,
-    });
+    const ghApp = new GhApp(1234);
+    installationUrl = await ghApp.getInstallationUrl(user.githubId);
 }
 ---
 
