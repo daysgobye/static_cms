@@ -12,7 +12,7 @@ type FlatTreeItem = {
     url: string
     size?: number
 }
-type TreeNode = {
+export type TreeNode = {
     name: string;
     path: string;
     mode: string;
@@ -22,11 +22,20 @@ type TreeNode = {
     size?: number;
     children?: Record<string, TreeNode>;
 };
+export type FileItem = {
+    name: string;
+    path: string;
+    type: 'blob' | 'tree';
+    content: string;
+    repoItem?: FlatTreeItem | TreeNode
+}
 export class GhApp {
     appId = 1046024
     app: App
     octokit: Octokit | undefined
     installId: number
+    settingsFileName = "flat-cms.json"
+    flatTrees: Record<string, FlatTreeItem[]> = {}
     constructor(installId: number) {
         this.installId = installId
         this.app = new App({
@@ -88,11 +97,11 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
                 "X-GitHub-Api-Version": "2022-11-28",
             },
         });
-        return repos
+        return repos.data.repositories
     }
     async getRepo(repoName: string) {
         const repos = await this.getRepoList()
-        const repo = repos.data.repositories.filter(
+        const repo = repos.filter(
             (repo) => repo.name === repoName,
         )[0];
         if (repo) {
@@ -103,6 +112,9 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
     }
 
     async getFlatTree(repo: Awaited<ReturnType<typeof this.getRepo>>) {
+        if (this.flatTrees.hasOwnProperty(repo.name)) {
+            return this.flatTrees[repo.name]
+        }
         const octokit = await this.getOctoKit()
         const flatTree: FlatTreeItem[] = await octokit.request(
             "GET /repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1",
@@ -115,14 +127,35 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
                 },
             },
         ).then(res => res.data.tree)
+        this.flatTrees[repo.name] = flatTree
         return flatTree
+    }
+    async getSettingsFile(repo: Awaited<ReturnType<typeof this.getRepo>>) {
+        const flatTree = await this.getFlatTree(repo)
+        const settingsFile = flatTree.find(treeItem => treeItem.path.includes(this.settingsFileName))
+        if (settingsFile) {
+            return await this.getFileContent(settingsFile, repo)
+        } else {
+            return undefined
+        }
     }
 
     async getTree(repo: Awaited<ReturnType<typeof this.getRepo>>) {
-        const flatTree = await this.getFlatTree(repo)
+        const flatTreeRaw = await this.getFlatTree(repo)
+        const flatTree = flatTreeRaw.filter(item => {
+            const tree = item.type === "tree"
+            if (tree) {
+                return true
+            }
+            const split = item.path.split(".")
+            const fileType = split[split.length - 1]
+            const acceptedFiletypes = ["md", "mdx", 'png', 'jpg', 'jpeg', 'gif', "webem"]
+            return acceptedFiletypes.includes(fileType)
+
+        })
         const root: TreeNode = {
-            name: '',
-            path: '',
+            name: 'root',
+            path: '/',
             mode: '',
             type: 'tree',
             sha: '',
@@ -157,7 +190,7 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
         });
         return root;
     }
-    async getFileContent(repoItem: FlatTreeItem | TreeNode, repo: Awaited<ReturnType<typeof this.getRepo>>) {
+    async getFileContent(repoItem: FlatTreeItem | TreeNode, repo: Awaited<ReturnType<typeof this.getRepo>>): Promise<FileItem> {
         const octokit = await this.getOctoKit()
         if (repoItem.type !== 'blob') {
             throw new Error("Only request files not folders");
@@ -177,6 +210,7 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
             decoded = atob(res.data.content)
         }
         return {
+            repoItem,
             //@ts-ignore
             name: res.data.name,
             //@ts-ignore
@@ -186,6 +220,30 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
             content: decoded
         }
 
+    }
+    async pushFile(message: string, email: string, name: string, fileItem: FileItem, repo: Awaited<ReturnType<typeof this.getRepo>>) {
+        const octokit = await this.getOctoKit(),
+            content = btoa(fileItem.content)
+        let requestData = {
+            owner: repo.owner.login,
+            repo: repo.name,
+            path: fileItem.path,
+            message,
+            committer: {
+                name,
+                email
+            },
+            content,
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        }
+        if (fileItem.repoItem !== undefined) {
+            //@ts-ignore
+            requestData.sha = fileItem.repoItem.sha
+        }
+        const res = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', requestData)
+        return res.data
     }
 
 }

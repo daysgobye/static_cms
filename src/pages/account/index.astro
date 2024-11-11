@@ -1,42 +1,33 @@
 ---
-import InstallApp from "@components/account/installApp.astro";
-
-import SelectPlan from "@components/account/selectPlan.astro";
-import UserDashboard from "@components/account/userDashboard.astro";
 import Layout from "@layouts/layout.astro";
 import { GhApp } from "@lib/github";
 
 const user = Astro.locals.user;
-
-if (user && user.installId) {
-    const ghApp = new GhApp(user.installId);
-    console.log(user);
-    const octokit = await ghApp.app.getInstallationOctokit(user.installId);
-
-    const repo = await ghApp.getRepo("balatzee");
-    if (repo) {
-        console.log("--------------------contents-------------------");
-        const tree = await ghApp.getTree(repo);
-        //@ts-ignore
-        const file = await ghApp.getFileContent(tree.children["todo.md"], repo);
-        console.log(file);
+//@ts-ignore
+const ghApp = new GhApp(user.installId);
+const repos = await ghApp.getRepoList();
+// console.log(repos);
+if (Astro.request.method === "POST") {
+    try {
+        const data = await Astro.request.formData();
+        const repo = data.get("repo");
+        console.log("going to", repo);
+        return Astro.redirect(`/account/repo/${repo}`);
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
     }
-} else {
-    console.log("missing");
-    console.log(user);
 }
 ---
 
 <Layout>
-    {
-        user && user.installId ? (
-            user && user.plan ? (
-                <UserDashboard />
-            ) : (
-                <SelectPlan />
-            )
-        ) : (
-            <InstallApp />
-        )
-    }
+    <h2>select repo</h2>
+    <form method="post">
+        <select class="select select-bordered w-full max-w-xs" name="repo">
+            <option disabled selected>Select repo</option>
+            {repos.map((repo) => <option>{repo.name}</option>)}
+        </select>
+        <input type="submit" value="Select" class="btn" />
+    </form>
 </Layout>

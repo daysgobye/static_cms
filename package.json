@@ -26,11 +26,13 @@
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@noble/hashes": "^1.5.0",
     "@octokit/app": "^15.1.0",
+    "@toast-ui/editor": "^3.2.2",
     "arctic": "^2.2.1",
     "astro": "^4.15.3",
     "better-sqlite3": "^11.3.0",
     "drizzle-orm": "^0.33.0",
     "lucia": "^3.2.0",
+    "markdown-it": "^14.1.0",
     "octokit": "^4.0.2",
     "postgres": "^3.4.4",
     "sharp": "^0.32.5",
@@ -39,8 +41,10 @@
     "typescript": "^5.6.2"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.15",
     "@types/better-sqlite3": "^7.6.11",
     "@types/bun": "^1.1.10",
+    "@types/markdown-it": "^14.1.2",
     "daisyui": "^4.12.10",
     "drizzle-kit": "^0.24.2"
   }

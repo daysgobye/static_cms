@@ -1,0 +1,14 @@
+---
+import markdownit from "markdown-it";
+const md = markdownit();
+
+interface Props {
+    content: string;
+    className?: string;
+}
+const { className, content, ...rest } = Astro.props;
+---
+
+<article class={`prose className`}>
+    <Fragment set:html={md.render(content)} />
+</article>

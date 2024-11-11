@@ -6,7 +6,6 @@ import node from '@astrojs/node';
 import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
-
 const starlightConfig = starlight({
     title: 'My Docs',
     components: {

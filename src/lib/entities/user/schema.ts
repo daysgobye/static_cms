@@ -7,6 +7,7 @@ export type UserPlan = "Free" | "Base" | "Pro" | null
 export const user = sqliteTable("user", {
     githubId: integer('github_id').unique(),
     username: text("username"),
+    name: text('name'),
     installId: integer('install_id'),
     email: text("email").unique(),
     password_hash: text("password_hash").notNull(),

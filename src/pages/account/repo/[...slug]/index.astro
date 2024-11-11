@@ -1,0 +1,63 @@
+---
+import EditView from "@components/common/editView.astro";
+import Tree from "@components/common/tree.astro";
+import Layout from "@layouts/layout.astro";
+import { GhApp, type TreeNode } from "@lib/github";
+
+const user = Astro.locals.user;
+//@ts-ignore
+const ghApp = new GhApp(user.installId);
+const { slug } = Astro.params;
+let tree: TreeNode = {
+    name: "",
+    path: "",
+    mode: "",
+    type: "tree",
+    sha: "",
+    url: "",
+    children: {},
+};
+let content = "# Hello world";
+const file = Astro.url.searchParams.get("file");
+
+try {
+    const repo = await ghApp.getRepo(slug ? slug : "");
+    const settings = await ghApp.getSettingsFile(repo);
+    if (settings === undefined) {
+        return Astro.redirect(`/account/repo/${slug}/settings`);
+    }
+    tree = await ghApp.getTree(repo);
+    const flatTree = await ghApp.getFlatTree(repo);
+    const fileItem = flatTree.find((item) => item.path === file);
+    if (fileItem) {
+        content = await ghApp
+            .getFileContent(fileItem, repo)
+            .then((file) => file.content);
+    }
+} catch (error) {
+    return Astro.redirect("/404");
+}
+
+if (Astro.request.method === "POST") {
+    try {
+        // const data = await Astro.request.formData();
+        // const repo = data.get("repo");
+        // console.log("seleccted repo is", repo);
+        // Do something with the data
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error(error.message);
+        }
+    }
+}
+---
+
+<Layout>
+    <div class="grid grid-cols-8 gap-4">
+        <h2 class="text-2xl col-span-8">{slug}</h2>
+        <Tree tree={tree} className="col-span-2" />
+        <div id="editparent" class="col-span-6">
+            <EditView content={content} className="" />
+        </div>
+    </div>
+</Layout>

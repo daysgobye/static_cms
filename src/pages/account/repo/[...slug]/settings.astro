@@ -1,0 +1,176 @@
+---
+import ArrayInput from "@components/common/form/arrayInput.astro";
+import Select from "@components/common/form/select.astro";
+import Text from "@components/common/form/text.astro";
+import Layout from "@layouts/layout.astro";
+import { GhApp, type FileItem } from "@lib/github";
+import type { SettingsFile } from "@lib/types";
+import { json } from "drizzle-orm/pg-core";
+
+const user = Astro.locals.user;
+//@ts-ignore
+const ghApp = new GhApp(user.installId);
+const { slug } = Astro.params;
+let settings: SettingsFile = {
+    newFileType: ".md",
+    frontMatterFields: [
+        {
+            title: "title",
+            input: "shortText",
+        },
+        {
+            title: "description",
+            input: "longText",
+        },
+        {
+            title: "featured",
+            input: "bool",
+        },
+        {
+            title: "slug",
+            input: "shortText",
+        },
+    ],
+};
+try {
+    const repo = await ghApp.getRepo(slug ? slug : "");
+    const repoSettings = await ghApp.getSettingsFile(repo);
+    if (repoSettings) {
+        settings = JSON.parse(repoSettings.content);
+    }
+    // console.log(repos);
+    if (Astro.request.method === "POST") {
+        try {
+            const data = await Astro.request.formData();
+            let tempSettings: SettingsFile = {
+                newFileType: data.get("newFileType") as ".md" | ".mdx",
+                frontMatterFields: [],
+            };
+            [...data.keys()]
+                .filter((key) => key.startsWith("frontMatterFields"))
+                .forEach((key) => {
+                    const inputData = data.get(key);
+                    const split = key.split("-");
+                    let tempField = {
+                        ...tempSettings.frontMatterFields[Number(split[1])],
+                    };
+                    //@ts-ignore
+                    tempField[split[2]] = inputData;
+                    tempSettings.frontMatterFields[Number(split[1])] =
+                        tempField;
+                });
+
+            if (user) {
+                let file: FileItem = repoSettings
+                    ? repoSettings
+                    : {
+                          name: ghApp.settingsFileName,
+                          path: ghApp.settingsFileName,
+                          type: "blob",
+                          content: "",
+                      };
+                file.content = JSON.stringify(tempSettings);
+                await ghApp.pushFile(
+                    "changed Flat cms settings",
+                    user.email,
+                    user.name,
+                    file,
+                    repo,
+                );
+                return Astro.redirect(Astro.url.pathname + "?saved=true");
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+            }
+        }
+    }
+} catch (error) {
+    return Astro.redirect("/404");
+}
+const saved = Astro.url.searchParams.get("saved");
+---
+
+<Layout>
+    <h2>Settings for {slug}</h2>
+    {
+        saved === "true" && (
+            <div
+                role="alert"
+                class="alert alert-success"
+                x-data="{ show: true }"
+                x-show="show"
+                x-init="setTimeout(() => show = false, 10000)"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 shrink-0 stroke-current"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                </svg>
+                <span>Saved</span>
+            </div>
+        )
+    }
+    <form method="post" class="max-w-md mx-auto">
+        <Select
+            name="newFileType"
+            label="New File Type"
+            value={settings.newFileType}
+        >
+            <option disabled selected>New FileType</option>
+            <option value=".md" selected={settings.newFileType === ".md"}
+                >.md</option
+            >
+            <option value=".mdx" selected={settings.newFileType === ".mdx"}
+                >.mdx</option
+            >
+        </Select>
+
+        <ArrayInput
+            push="{title:'',input:'shortText'}"
+            addBtnText=" add front matter field"
+            value={JSON.stringify(settings.frontMatterFields)}
+        >
+            <fieldset class="border border-solid border-primary p-3">
+                <legend class="text-sm">Front Matter Field </legend>
+
+                <Text
+                    label="key"
+                    placeholder="front matter key eg: Title"
+                    x-bind:name="'frontMatterFields-' + index + '-title'"
+                    name="missing"
+                    x-bind:value="item.title"
+                />
+                <Select
+                    x-bind:name="'frontMatterFields-' + index + '-input'"
+                    name="missing"
+                    label="input type"
+                    x-bind:value="item.input"
+                >
+                    <option disabled selected>input type</option>
+                    <option>shortText</option>
+                    <option>longText</option>
+                    <option>filePath</option>
+                    <option>array</option>
+                    <option>bool</option>
+                    <option>number</option>
+                </Select>
+
+                <button
+                    type="button"
+                    class="btn btn-active btn-secondary"
+                    @click="items.splice(index, 1)">Remove</button
+                >
+            </fieldset>
+        </ArrayInput>
+        <input type="submit" value="Save" class="btn btn-active btn-primary" />
+    </form>
+</Layout>

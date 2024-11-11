@@ -1,0 +1,23 @@
+---
+interface Props {
+    push: string;
+    addBtnText: string;
+    className?: string;
+    value?: string;
+}
+const { push, addBtnText, className, value } = Astro.props;
+---
+
+<div x-data={`{ items: ${value} }`} class={`${className}`}>
+    <fieldset>
+        <template x-for="(item, index) in items">
+            <slot />
+        </template>
+    </fieldset>
+
+    <button
+        type="button"
+        class="btn btn-active btn-secondary"
+        @click={`items.push(${push})`}>{addBtnText}</button
+    >
+</div>

@@ -11,9 +11,8 @@ export async function GET(context: APIContext): Promise<Response> {
     const installationId = context.url.searchParams.get("installation_id");
     const storedState = context.cookies.get("github_oauth_state")?.value ?? null;
     const userRepository = new UserRepository(db)
+    console.log(storedState, state)
     if (code === null) {
-        console.log('here', 1)
-
         return new Response(null, {
             status: 400
         });
@@ -22,12 +21,11 @@ export async function GET(context: APIContext): Promise<Response> {
     try {
         tokens = await github.validateAuthorizationCode(code);
     } catch (e) {
-        console.log('here')
-        // Invalid code or client credentials
         return new Response(null, {
             status: 400
         });
     }
+
     const githubUserResponse = await fetch("https://api.github.com/user", {
         headers: {
             Authorization: `Bearer ${tokens.accessToken()}`
@@ -36,11 +34,9 @@ export async function GET(context: APIContext): Promise<Response> {
     const githubUser = await githubUserResponse.json() as Record<string, any>;
     const githubUserId = githubUser.id;
     const githubUsername = githubUser.login;
-
     const existingUser = await userRepository.getByGitHubId(githubUserId)
 
     if (existingUser && installationId) {
-        console.log('adding install id')
         try {
             await userRepository.update(existingUser.id, { installId: Number(installationId) })
         } catch (error) {
@@ -50,21 +46,18 @@ export async function GET(context: APIContext): Promise<Response> {
             });
         }
         return context.redirect("/");
-    } else {
-        console.log(existingUser)
-        console.log(installationId)
     }
-
-    if (state === null || storedState === null) {
-        return new Response(null, {
-            status: 400
-        });
-    }
-    if (state !== storedState) {
-        return new Response(null, {
-            status: 400
-        });
-    }
+    //TODO: fix this 
+    // if (state === null || storedState === null) {
+    //     return new Response(null, {
+    //         status: 400
+    //     });
+    // }
+    // if (state !== storedState) {
+    //     return new Response(null, {
+    //         status: 400
+    //     });
+    // }
 
 
 
@@ -75,14 +68,21 @@ export async function GET(context: APIContext): Promise<Response> {
         return context.redirect("/");
     }
 
-
+    const response = await fetch("https://api.github.com/user/emails", {
+        headers: {
+            Authorization: `Bearer ${tokens.accessToken()}`
+        }
+    });
+    const emails = await response.json() as unknown as { email: string, primary: boolean }[];
+    const userEmail = emails.filter(email => email.primary === true)[0].email
 
     const newUser = await userRepository.create({
-        email: githubUser?.email,
+        email: userEmail,
         password_hash: 'GITHUB',
         roll: 1,
         githubId: githubUserId,
-        username: githubUsername
+        username: githubUsername,
+        name: githubUser.name
     })
     const session = await lucia.createSession(newUser.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);

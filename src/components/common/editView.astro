@@ -1,0 +1,52 @@
+---
+// import Editor from "./form/editor.astro";
+// import MdViewer from "./mdViewer.astro";
+interface Props {
+    content: string;
+    className?: string;
+}
+const { className, content, ...rest } = Astro.props;
+---
+
+<>
+    <div class={`${className}`} data-content={content} id="contentSwap"></div>
+
+    <div class={`${className}`} id="editor"></div>
+    <script>
+        //@ts-ignore
+        import Editor from "@toast-ui/editor";
+        import "@toast-ui/editor/dist/toastui-editor.css";
+        const editorId = "#editor";
+
+        const editorEl = document.querySelector(editorId);
+
+        const options = {
+            el: editorEl,
+            height: "500px",
+            initialEditType: "markdown",
+            //@ts-ignore
+            usageStatistics: false,
+        };
+
+        let editor = new Editor(options);
+
+        const render = () => {
+            console.log("rendering");
+            const editorEl = document.querySelector("#contentSwap");
+
+            if (editorEl) {
+                //@ts-ignore
+                editor.setMarkdown(editorEl.dataset.content, false);
+            }
+        };
+        render();
+        //@ts-ignore
+        htmx.on("htmx:afterSwap", function (evt) {
+            console.log(evt);
+            const eventIdTarget = evt["target"].id;
+            if (eventIdTarget === "contentSwap") {
+                render();
+            }
+        });
+    </script>
+</>

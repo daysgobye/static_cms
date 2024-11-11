@@ -1,0 +1,17 @@
+---
+interface Props {
+    label: string;
+    name: string;
+    value?: string;
+}
+const { label, name, value, ...rest } = Astro.props;
+---
+
+<label class="form-control w-full max-w-xs">
+    <div class="label">
+        <span class="label-text">{label}</span>
+    </div>
+    <select class="select select-bordered" name={name} value={value} {...rest}>
+        <slot />
+    </select>
+</label>

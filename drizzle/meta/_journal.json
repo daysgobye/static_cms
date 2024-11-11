@@ -15,6 +15,13 @@
       "when": 1730825978771,
       "tag": "0001_regular_vulcan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1730990778228,
+      "tag": "0002_cold_black_queen",
+      "breakpoints": true
     }
   ]
 }

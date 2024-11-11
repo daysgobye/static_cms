@@ -1,12 +1,15 @@
 ---
-import SelectPlan from "@components/account/selectPlan.astro";
+import { GhApp } from "@lib/github";
 
 const user = Astro.locals.user;
-console.log(user);
+
+if (user && user.installId) {
+    const ghApp = new GhApp(user.installId);
+    const repos = await ghApp.getRepoList();
+    console.log(repos);
+}
 ---
 
 <div>
-    <h2>
-        Welcom back {user?.email}
-    </h2>
+    <h2></h2>
 </div>

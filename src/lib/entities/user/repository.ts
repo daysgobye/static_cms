@@ -11,6 +11,7 @@ export type CreateUserInput = {
     plan?: UserPlan
     githubId?: number
     username?: string
+    name?: string
 }
 export type UpdateUserInput = {
     roll?: UserRoll

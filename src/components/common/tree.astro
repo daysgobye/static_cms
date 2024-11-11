@@ -1,0 +1,83 @@
+---
+import type { TreeNode } from "@lib/github";
+
+interface Props {
+    tree: TreeNode;
+    className?: string;
+}
+const { tree, className } = Astro.props;
+let fileIcon = "bxs-file-blank";
+const fileExt = tree.name.split(".");
+switch (fileExt[fileExt.length - 1]) {
+    case "md":
+        fileIcon = "bxs-file-md";
+        break;
+    case "mdx":
+        fileIcon = "bxs-file-md";
+        break;
+    case "js":
+        fileIcon = "bxs-file-js";
+        break;
+    case "css":
+        fileIcon = "bxs-file-css";
+        break;
+    case "json":
+        fileIcon = "bxs-file-json";
+        break;
+    case "html":
+        fileIcon = "bxs-file-html";
+        break;
+    default:
+        fileIcon = "bxs-file-blank";
+        break;
+}
+---
+
+<>
+    {
+        tree.type === "tree" ? (
+            <div class={`ml-4 ${className}`}>
+                <div x-data="{ activeAccordion: false }" class="">
+                    <button
+                        @click="activeAccordion = !activeAccordion"
+                        class="text-lg	"
+                    >
+                        <template x-if="activeAccordion">
+                            <i class="text-xl bx bxs-folder-open pr-2" />{" "}
+                        </template>
+                        <template x-if="!activeAccordion">
+                            <i class="text-xl bx bxs-folder pr-2" />{" "}
+                        </template>
+                        {tree.name}
+                    </button>
+
+                    <div
+                        x-cloak
+                        x-collapse
+                        x-show="activeAccordion"
+                        class="border-l-2 "
+                    >
+                        {tree.type === "tree" && tree.children
+                            ? Object.values(tree.children).map((child) => (
+                                  <Astro.self tree={child} />
+                              ))
+                            : ""}
+                    </div>
+                </div>
+            </div>
+        ) : (
+            <div class={`ml-4 ${className}`}>
+                {/* TODO: add htmx stuff */}
+                <button
+                    class="text-lg	"
+                    hx-post={`${Astro.url.pathname}/partials/clickedfile?file=${tree.path}`}
+                    hx-trigger="click"
+                    hx-target="#contentSwap"
+                    hx-swap="outerHTML"
+                >
+                    <i class={`text-xl bx ${fileIcon} pr-2`} /> {tree.name}
+                </button>
+            </div>
+        )
+    }
+</>

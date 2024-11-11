@@ -1,0 +1,23 @@
+---
+interface Props {
+    label: string;
+    name: string;
+    placeholder: string;
+    value?: string;
+}
+const { label, name, placeholder, value, ...rest } = Astro.props;
+---
+
+<label class="form-control w-full max-w-xs">
+    <div class="label">
+        <span class="label-text">{label}</span>
+    </div>
+    <input
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        class="input input-bordered w-full max-w-xs"
+        name={name}
+        {...rest}
+    />
+</label>

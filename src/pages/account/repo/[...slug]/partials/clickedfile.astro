@@ -1,0 +1,30 @@
+---
+import EditView from "@components/common/editView.astro";
+import { GhApp } from "@lib/github";
+
+export const partial = true;
+let content = "# Hello world";
+const file = Astro.url.searchParams.get("file");
+const user = Astro.locals.user;
+const { slug } = Astro.params;
+//@ts-ignore
+const ghApp = new GhApp(user.installId);
+try {
+    const repo = await ghApp.getRepo(slug ? slug : "");
+    const settings = await ghApp.getSettingsFile(repo);
+    if (settings === undefined) {
+        return Astro.redirect(`/account/repo/${slug}/settings`);
+    }
+    const flatTree = await ghApp.getFlatTree(repo);
+    const fileItem = flatTree.find((item) => item.path === file);
+    if (fileItem) {
+        content = await ghApp
+            .getFileContent(fileItem, repo)
+            .then((file) => file.content);
+    }
+} catch (error) {
+    return Astro.redirect("/404");
+}
+---
+
+<div data-content={content} id="contentSwap"></div>
