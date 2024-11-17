@@ -1,30 +1,70 @@
 ---
 import EditView from "@components/common/editView.astro";
-import { GhApp } from "@lib/github";
+import FrontmatterEditor from "@components/common/form/frontmatterEditor.astro";
+import { GhApp, type FileItem } from "@lib/github";
+import type { FrontMatterField } from "@lib/types";
+import { getFileParam } from "@lib/utils";
 
 export const partial = true;
-let content = "# Hello world";
-const file = Astro.url.searchParams.get("file");
+let fileObj: FileItem = {
+    fileType: "string",
+    name: "",
+    path: "",
+    type: "tree",
+    content: "",
+};
+let inputs: FrontMatterField[] = [];
+const file = getFileParam(Astro);
 const user = Astro.locals.user;
 const { slug } = Astro.params;
 //@ts-ignore
 const ghApp = new GhApp(user.installId);
+let filePaths: string[] = [];
 try {
     const repo = await ghApp.getRepo(slug ? slug : "");
-    const settings = await ghApp.getSettingsFile(repo);
+    const settings = await ghApp.getSettings(repo);
     if (settings === undefined) {
         return Astro.redirect(`/account/repo/${slug}/settings`);
     }
+    inputs = settings.frontMatterFields;
     const flatTree = await ghApp.getFlatTree(repo);
+    filePaths = flatTree.map((item) => item.path);
     const fileItem = flatTree.find((item) => item.path === file);
     if (fileItem) {
-        content = await ghApp
-            .getFileContent(fileItem, repo)
-            .then((file) => file.content);
+        fileObj = await ghApp.getFileContent(fileItem, repo);
     }
+    console.log(Astro.url);
+    Astro.response.headers.set(
+        "hx-push-url",
+        `/account/repo/${slug}${Astro.url.search}`,
+    );
 } catch (error) {
+    console.log(error);
     return Astro.redirect("/404");
 }
 ---
 
-<div data-content={content} id="contentSwap"></div>
+<div
+    data-content={fileObj.content}
+    class="flex justify-end flex-col"
+    id="contentSwap"
+>
+    {
+        fileObj.fileType === "string" ? (
+            <>
+                <input
+                    class="btn btn-active btn-primary"
+                    type="submit"
+                    value="Save"
+                />
+                <FrontmatterEditor
+                    values={fileObj.frontMatter ? fileObj.frontMatter : {}}
+                    inputs={inputs}
+                    filePaths={filePaths}
+                />
+            </>
+        ) : (
+            <img src={fileObj.content} alt="" />
+        )
+    }
+</div>

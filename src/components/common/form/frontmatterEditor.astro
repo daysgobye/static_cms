@@ -1,0 +1,169 @@
+---
+import type { FrontMatterField } from "@lib/types";
+import Text from "./text.astro";
+import ArrayInput from "./arrayInput.astro";
+import Select from "./select.astro";
+import { undefined } from "astro:schema";
+
+interface Props {
+    inputs: FrontMatterField[];
+    values: Record<string, any>;
+    filePaths: string[];
+}
+const { filePaths, inputs, values, ...rest } = Astro.props;
+---
+
+<div x-data="{ isExpanded: false }" class="mt-4 mb-4">
+    <button
+        id="controlsAccordionItemOne"
+        type="button"
+        class="btn btn-active btn-secondary flex w-full items-center justify-between gap-4 p-4 text-left underline-offset-2 focus-visible:underline focus-visible:outline-none"
+        aria-controls="accordionItemOne"
+        @click="isExpanded = ! isExpanded"
+        :class="isExpanded ? 'text-onSurfaceStrong  font-bold'  : 'text-onSurface  font-medium'"
+        :aria-expanded="isExpanded ? 'true' : 'false'"
+    >
+        Edit Post Data
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke-width="2"
+            stroke="currentColor"
+            class="size-5 shrink-0 transition"
+            aria-hidden="true"
+            :class="isExpanded  ?  'rotate-180'  :  ''"
+        >
+            <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M19.5 8.25l-7.5 7.5-7.5-7.5"></path>
+        </svg>
+    </button>
+    <fieldset
+        x-cloak
+        x-show="isExpanded"
+        id="accordionItemOne"
+        role="region"
+        aria-labelledby="controlsAccordionItemOne"
+        x-collapse
+        class="border border-solid border-primary p-3 grid grid-cols-3 gap-4 mt-4"
+    >
+        <legend class="text-xl">Front Matter Field </legend>
+        {
+            inputs.map((field) => {
+                const value = values[field.title];
+                switch (field.input) {
+                    case "shortText":
+                        return (
+                            <Text
+                                label={field.title}
+                                value={`${value}`.trim()}
+                                name={`frontMatterFields-${field.title}`}
+                                placeholder={field.title}
+                            />
+                        );
+                    case "longText":
+                        return (
+                            <label class="form-control">
+                                <div class="label">
+                                    <span class="label-text">
+                                        {field.title}
+                                    </span>
+                                </div>
+                                <textarea
+                                    class="textarea textarea-bordered h-24"
+                                    name={`frontMatterFields-${field.title}`}
+                                    placeholder={field.title}
+                                >
+                                    {typeof value === "object"
+                                        ? JSON.stringify(value, null, 2).trim()
+                                        : value}
+                                </textarea>
+                            </label>
+                        );
+                    case "filePath":
+                        return (
+                            <Select
+                                label={field.title}
+                                value={`${value}`.trim()}
+                                name={`frontMatterFields-${field.title}`}
+                            >
+                                <option disabled selected>
+                                    {field.title}
+                                </option>
+                                {filePaths.map((path) => (
+                                    <option>{path}</option>
+                                ))}
+                            </Select>
+                        );
+                    case "array":
+                        return (
+                            <ArrayInput
+                                push='""'
+                                addBtnText={`add ${field.title}`}
+                                value={JSON.stringify(value)}
+                            >
+                                <>
+                                    <Text
+                                        label={field.title}
+                                        x-bind:value="item"
+                                        x-bind:name={`'frontMatterFields-array_' + index + '_${field.title}'`}
+                                        placeholder={field.title}
+                                    />
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-active btn-secondary mt-4 mb-4"
+                                        x-bind:click="items.splice(index, 1)"
+                                    >
+                                        Remove
+                                    </button>
+                                </>
+                            </ArrayInput>
+                        );
+                    case "bool":
+                        return (
+                            <div class="form-control">
+                                <label class="label cursor-pointer">
+                                    <span class="label-text">
+                                        {field.title}
+                                    </span>
+                                    <input
+                                        type="hidden"
+                                        name={`frontMatterFields-${field.title}`}
+                                        value="false"
+                                    />
+
+                                    <input
+                                        type="checkbox"
+                                        class="toggle"
+                                        checked={value ? "checked" : ""}
+                                        value="true"
+                                        name={`frontMatterFields-${field.title}`}
+                                    />
+                                </label>
+                            </div>
+                        );
+                    case "number":
+                        return (
+                            <label class="form-control w-full max-w-xs">
+                                <div class="label">
+                                    <span class="label-text">
+                                        {field.title}
+                                    </span>
+                                </div>
+                                <input
+                                    type="number"
+                                    value={`${value}`.trim()}
+                                    name={`frontMatterFields-${field.title}`}
+                                    placeholder={field.title}
+                                    class="input input-bordered w-full max-w-xs"
+                                />
+                            </label>
+                        );
+                }
+            })
+        }
+    </fieldset>
+</div>

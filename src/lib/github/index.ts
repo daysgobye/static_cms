@@ -1,6 +1,10 @@
 import { App } from "@octokit/app";
 import type { Endpoints } from "@octokit/types";
 import { Octokit as OctokitCore } from "@octokit/core";
+import { matter } from 'md-front-matter';
+import type { SettingsFile } from "@lib/types";
+import { toBinary, fromBinary } from "@lib/utils";
+
 
 type Octokit = InstanceType<typeof OctokitCore>;
 type RepoResponce = Endpoints["GET /installation/repositories"]["response"]
@@ -23,6 +27,8 @@ export type TreeNode = {
     children?: Record<string, TreeNode>;
 };
 export type FileItem = {
+    frontMatter?: Record<string, any>
+    fileType: "image" | "string"
     name: string;
     path: string;
     type: 'blob' | 'tree';
@@ -76,7 +82,7 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
             },
         });
     }
-    async getInstallationUrl(githubId) {
+    async getInstallationUrl(githubId: number) {
         return await this.app.getInstallationUrl({
             target_id: githubId,
         });
@@ -112,29 +118,46 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
     }
 
     async getFlatTree(repo: Awaited<ReturnType<typeof this.getRepo>>) {
-        if (this.flatTrees.hasOwnProperty(repo.name)) {
-            return this.flatTrees[repo.name]
-        }
-        const octokit = await this.getOctoKit()
-        const flatTree: FlatTreeItem[] = await octokit.request(
-            "GET /repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1",
-            {
-                owner: repo.owner.login,
-                repo: repo.name,
-                tree_sha: repo.default_branch,
-                headers: {
-                    "X-GitHub-Api-Version": "2022-11-28",
+        if (repo) {
+
+            if (this.flatTrees.hasOwnProperty(repo.name)) {
+                return this.flatTrees[repo.name]
+            }
+            const octokit = await this.getOctoKit()
+            const flatTree: FlatTreeItem[] = await octokit.request(
+                "GET /repos/{owner}/{repo}/git/trees/{tree_sha}?recursive=1",
+                {
+                    owner: repo.owner.login,
+                    repo: repo.name,
+                    tree_sha: repo.default_branch,
+                    headers: {
+                        "X-GitHub-Api-Version": "2022-11-28",
+                    },
                 },
-            },
-        ).then(res => res.data.tree)
-        this.flatTrees[repo.name] = flatTree
-        return flatTree
+            ).then(res => res.data.tree)
+            this.flatTrees[repo.name] = flatTree
+            return flatTree
+        } else {
+            throw new Error("repo undefined")
+        }
     }
-    async getSettingsFile(repo: Awaited<ReturnType<typeof this.getRepo>>) {
+
+
+    async getSettingsFile(repo: Awaited<ReturnType<typeof this.getRepo>>): Promise<FileItem | undefined> {
         const flatTree = await this.getFlatTree(repo)
         const settingsFile = flatTree.find(treeItem => treeItem.path.includes(this.settingsFileName))
         if (settingsFile) {
-            return await this.getFileContent(settingsFile, repo)
+            const file = await this.getFileContent(settingsFile, repo)
+            return file
+        } else {
+            return undefined
+        }
+    }
+    async getSettings(repo: Awaited<ReturnType<typeof this.getRepo>>): Promise<SettingsFile | undefined> {
+
+        const file = await this.getSettingsFile(repo)
+        if (file) {
+            return JSON.parse(file.content)
         } else {
             return undefined
         }
@@ -191,59 +214,84 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
         return root;
     }
     async getFileContent(repoItem: FlatTreeItem | TreeNode, repo: Awaited<ReturnType<typeof this.getRepo>>): Promise<FileItem> {
-        const octokit = await this.getOctoKit()
-        if (repoItem.type !== 'blob') {
-            throw new Error("Only request files not folders");
-        }
-        const res = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
-            owner: repo.owner.login,
-            repo: repo.name,
-            path: repoItem.path,
-            headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
+        if (repo) {
+            const octokit = await this.getOctoKit()
+            if (repoItem.type !== 'blob') {
+                throw new Error("Only request files not folders");
             }
-        })
-        let decoded = ''
-        //@ts-ignore
-        if (res.data.type === 'file' && res.data.encoding === 'base64' && res.data.content) {
+            const res = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+                owner: repo.owner.login,
+                repo: repo.name,
+                path: repoItem.path,
+                headers: {
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
+            })
+            const imageTypes = ['png', 'jpg', 'jpeg', 'gif', "webem"]
             //@ts-ignore
-            decoded = atob(res.data.content)
-        }
-        return {
-            repoItem,
+            const nameSplit = res.data.name.split(".")
+            const fileType = nameSplit[nameSplit.length - 1]
+            let decoded = ''
             //@ts-ignore
-            name: res.data.name,
-            //@ts-ignore
-            path: res.data.path,
-            //@ts-ignore
-            type: res.data.type,
-            content: decoded
-        }
+            if (res.data.type === 'file' && res.data.encoding === 'base64' && res.data.content) {
 
+                if (imageTypes.includes(fileType)) {
+                    //@ts-ignore
+                    decoded = `data:image/${fileType};base64, ${res.data.content}`
+                } else {
+                    //@ts-ignore
+                    decoded = fromBinary(res.data.content)
+                }
+            }
+
+            let returnData: FileItem = {
+                fileType: imageTypes.includes(fileType) ? "image" : "string",
+                repoItem,
+                //@ts-ignore
+                name: res.data.name,
+                //@ts-ignore
+                path: res.data.path,
+                //@ts-ignore
+                type: res.data.type,
+                content: decoded
+            }
+            if (fileType === "md" || fileType === "mdx") {
+                const { content, data } = matter(returnData.content)
+                returnData.content = content
+                returnData.frontMatter = data
+            }
+            return returnData
+        } else {
+            throw new Error("repo undefined")
+        }
     }
     async pushFile(message: string, email: string, name: string, fileItem: FileItem, repo: Awaited<ReturnType<typeof this.getRepo>>) {
-        const octokit = await this.getOctoKit(),
-            content = btoa(fileItem.content)
-        let requestData = {
-            owner: repo.owner.login,
-            repo: repo.name,
-            path: fileItem.path,
-            message,
-            committer: {
-                name,
-                email
-            },
-            content,
-            headers: {
-                'X-GitHub-Api-Version': '2022-11-28'
+        if (repo) {
+            const octokit = await this.getOctoKit(),
+                content = toBinary(fileItem.content)
+            let requestData = {
+                owner: repo.owner.login,
+                repo: repo.name,
+                path: fileItem.path,
+                message,
+                committer: {
+                    name,
+                    email
+                },
+                content,
+                headers: {
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
             }
+            if (fileItem.repoItem !== undefined) {
+                //@ts-ignore
+                requestData.sha = fileItem.repoItem.sha
+            }
+            const res = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', requestData)
+            return res.data
+        } else {
+            throw new Error("repo undefined")
         }
-        if (fileItem.repoItem !== undefined) {
-            //@ts-ignore
-            requestData.sha = fileItem.repoItem.sha
-        }
-        const res = await octokit.request('PUT /repos/{owner}/{repo}/contents/{path}', requestData)
-        return res.data
     }
 
 }

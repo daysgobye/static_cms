@@ -1,17 +1,58 @@
 ---
+import type { FrontMatterField } from "@lib/types";
+import FrontmatterEditor from "./form/frontmatterEditor.astro";
+
 // import Editor from "./form/editor.astro";
 // import MdViewer from "./mdViewer.astro";
 interface Props {
     content: string;
     className?: string;
+    frontmatter: Record<string, any>;
+    inputs: FrontMatterField[];
+    filePaths: string[];
+    fileType: "image" | "string";
 }
-const { className, content, ...rest } = Astro.props;
+const {
+    fileType,
+    filePaths,
+    frontmatter,
+    className,
+    content,
+    inputs,
+    ...rest
+} = Astro.props;
 ---
 
-<>
-    <div class={`${className}`} data-content={content} id="contentSwap"></div>
+<form method="post">
+    <div
+        class={` flex justify-end flex-col ${className}`}
+        data-content={content}
+        id="contentSwap"
+    >
+        {
+            fileType === "string" ? (
+                <>
+                    <input
+                        class="btn btn-active btn-primary "
+                        type="submit"
+                        value="Save"
+                    />
+
+                    <FrontmatterEditor
+                        filePaths={filePaths}
+                        values={frontmatter}
+                        inputs={inputs}
+                    />
+                </>
+            ) : (
+                <img src={content} alt="" />
+            )
+        }
+    </div>
+    <textarea name="content" class="hidden" id="forminput"></textarea>
 
     <div class={`${className}`} id="editor"></div>
+
     <script>
         //@ts-ignore
         import Editor from "@toast-ui/editor";
@@ -19,24 +60,45 @@ const { className, content, ...rest } = Astro.props;
         const editorId = "#editor";
 
         const editorEl = document.querySelector(editorId);
-
+        const forminput = document.querySelector(
+            "#forminput",
+        ) as HTMLTextAreaElement;
         const options = {
             el: editorEl,
-            height: "500px",
+            height: "70vh",
             initialEditType: "markdown",
             //@ts-ignore
             usageStatistics: false,
         };
 
         let editor = new Editor(options);
+        editor.addHook("change", (e: any) => {
+            if (e === "markdown") {
+                forminput.value = editor.getMarkdown();
+            }
+        });
 
         const render = () => {
             console.log("rendering");
-            const editorEl = document.querySelector("#contentSwap");
-
-            if (editorEl) {
+            const contentEl = document.querySelector("#contentSwap");
+            //@ts-ignore
+            if (
+                editorEl &&
+                contentEl &&
                 //@ts-ignore
-                editor.setMarkdown(editorEl.dataset.content, false);
+                contentEl.dataset.content
+            ) {
+                //@ts-ignore
+
+                if (contentEl.dataset.content.startsWith("data:image")) {
+                    editorEl.classList.add("invisible");
+                    editorEl.classList.add("hidden");
+                } else {
+                    //@ts-ignore
+                    editor.setMarkdown(contentEl.dataset.content, false);
+                    editorEl.classList.remove("invisible");
+                    editorEl.classList.remove("hidden");
+                }
             }
         };
         render();
@@ -49,4 +111,4 @@ const { className, content, ...rest } = Astro.props;
             }
         });
     </script>
-</>
+</form>

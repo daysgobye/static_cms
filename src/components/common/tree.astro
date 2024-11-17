@@ -1,11 +1,13 @@
 ---
 import type { TreeNode } from "@lib/github";
+import { getPathParam, makeUrlSafe } from "@lib/utils";
 
 interface Props {
     tree: TreeNode;
     className?: string;
 }
 const { tree, className } = Astro.props;
+const openPaths = getPathParam(Astro);
 let fileIcon = "bxs-file-blank";
 const fileExt = tree.name.split(".");
 switch (fileExt[fileExt.length - 1]) {
@@ -34,13 +36,60 @@ switch (fileExt[fileExt.length - 1]) {
 ---
 
 <>
+    <script>
+        const appendToUrlParams = (
+            key: string,
+            value: string,
+            remove = false,
+        ) => {
+            const params = new URLSearchParams(window.location.search);
+
+            if (remove) {
+                const values = params.getAll(key);
+                const newValues = values.filter((v) => v !== value);
+                params.delete(key);
+                newValues.forEach((v) => params.append(key, v));
+            } else {
+                params.append(key, value);
+            }
+            return params.toString();
+        };
+        const addToUrlParams = (key: string, value: string) => {
+            let params = new URLSearchParams(window.location.search);
+            params.set(key, value);
+            return params.toString();
+        };
+        const buildUrl = (
+            basseUrl: string,
+            paramKey: string,
+            paramValue: string,
+        ) => {
+            const url = `${basseUrl}?${addToUrlParams(paramKey, paramValue)}`;
+            console.log(url);
+
+            return url;
+        };
+
+        //@ts-ignore
+        if (!window.flatCms) {
+            //@ts-ignore
+            window.flatCms = {};
+        }
+        //@ts-ignore
+        window.flatCms.addToUrlParams = appendToUrlParams;
+        //@ts-ignore
+        window.flatCms.buildUrl = buildUrl;
+    </script>
     {
         tree.type === "tree" ? (
-            <div class={`ml-4 ${className}`}>
-                <div x-data="{ activeAccordion: false }" class="">
+            <div class={`ml-4	 ${className}`}>
+                <div
+                    x-data={`{ activeAccordion: ${openPaths.includes(tree.name)} }`}
+                    class=""
+                >
                     <button
-                        @click="activeAccordion = !activeAccordion"
-                        class="text-lg	"
+                        x-on:click={`activeAccordion = !activeAccordion; window.history.replaceState(null,undefined,'?'+window.flatCms.addToUrlParams("path",'${tree.name}',!activeAccordion))`}
+                        class="text-lg"
                     >
                         <template x-if="activeAccordion">
                             <i class="text-xl bx bxs-folder-open pr-2" />{" "}
@@ -67,13 +116,9 @@ switch (fileExt[fileExt.length - 1]) {
             </div>
         ) : (
             <div class={`ml-4 ${className}`}>
-                {/* TODO: add htmx stuff */}
                 <button
                     class="text-lg	"
-                    hx-post={`${Astro.url.pathname}/partials/clickedfile?file=${tree.path}`}
-                    hx-trigger="click"
-                    hx-target="#contentSwap"
-                    hx-swap="outerHTML"
+                    x-on:click={`   htmx.ajax('POST', window.flatCms.buildUrl('${Astro.url.pathname}/partials/clickedfile','file','${makeUrlSafe(tree.path)}'), {target:'#contentSwap', swap:'outerHTML'})`}
                 >
                     <i class={`text-xl bx ${fileIcon} pr-2`} /> {tree.name}
                 </button>

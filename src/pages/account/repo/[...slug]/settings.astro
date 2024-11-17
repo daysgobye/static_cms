@@ -2,10 +2,9 @@
 import ArrayInput from "@components/common/form/arrayInput.astro";
 import Select from "@components/common/form/select.astro";
 import Text from "@components/common/form/text.astro";
-import Layout from "@layouts/layout.astro";
+import AccountLayout from "@layouts/accountLayout.astro";
 import { GhApp, type FileItem } from "@lib/github";
 import type { SettingsFile } from "@lib/types";
-import { json } from "drizzle-orm/pg-core";
 
 const user = Astro.locals.user;
 //@ts-ignore
@@ -34,9 +33,9 @@ let settings: SettingsFile = {
 };
 try {
     const repo = await ghApp.getRepo(slug ? slug : "");
-    const repoSettings = await ghApp.getSettingsFile(repo);
+    const repoSettings = await ghApp.getSettings(repo);
     if (repoSettings) {
-        settings = JSON.parse(repoSettings.content);
+        settings = repoSettings;
     }
     // console.log(repos);
     if (Astro.request.method === "POST") {
@@ -61,9 +60,11 @@ try {
                 });
 
             if (user) {
-                let file: FileItem = repoSettings
-                    ? repoSettings
+                const settingFile = await ghApp.getSettingsFile(repo);
+                let file: FileItem = settingFile
+                    ? settingFile
                     : {
+                          fileType: "string",
                           name: ghApp.settingsFileName,
                           path: ghApp.settingsFileName,
                           type: "blob",
@@ -88,38 +89,12 @@ try {
 } catch (error) {
     return Astro.redirect("/404");
 }
-const saved = Astro.url.searchParams.get("saved");
 ---
 
-<Layout>
-    <h2>Settings for {slug}</h2>
-    {
-        saved === "true" && (
-            <div
-                role="alert"
-                class="alert alert-success"
-                x-data="{ show: true }"
-                x-show="show"
-                x-init="setTimeout(() => show = false, 10000)"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 shrink-0 stroke-current"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                </svg>
-                <span>Saved</span>
-            </div>
-        )
-    }
-    <form method="post" class="max-w-md mx-auto">
+<AccountLayout>
+    <h2 class="text-xl">Settings for {slug}</h2>
+
+    <form method="post" class="">
         <Select
             name="newFileType"
             label="New File Type"
@@ -135,6 +110,8 @@ const saved = Astro.url.searchParams.get("saved");
         </Select>
 
         <ArrayInput
+            btnClassName="col-span-3"
+            className="grid grid-cols-3 gap-4 mb-4  "
             push="{title:'',input:'shortText'}"
             addBtnText=" add front matter field"
             value={JSON.stringify(settings.frontMatterFields)}
@@ -166,11 +143,11 @@ const saved = Astro.url.searchParams.get("saved");
 
                 <button
                     type="button"
-                    class="btn btn-active btn-secondary"
+                    class="btn btn-active btn-secondary mt-4 mb-4"
                     @click="items.splice(index, 1)">Remove</button
                 >
             </fieldset>
         </ArrayInput>
         <input type="submit" value="Save" class="btn btn-active btn-primary" />
     </form>
-</Layout>
+</AccountLayout>

@@ -1,13 +1,18 @@
 ---
 import EditView from "@components/common/editView.astro";
 import Tree from "@components/common/tree.astro";
-import Layout from "@layouts/layout.astro";
-import { GhApp, type TreeNode } from "@lib/github";
+import AccountLayout from "@layouts/accountLayout.astro";
+import { GhApp, type FileItem, type TreeNode } from "@lib/github";
+import type { FrontMatterField } from "@lib/types";
+import { getFileParam } from "@lib/utils";
+//@ts-ignore
+import YAML from "yaml";
 
 const user = Astro.locals.user;
 //@ts-ignore
 const ghApp = new GhApp(user.installId);
 const { slug } = Astro.params;
+let inputs: FrontMatterField[] = [];
 let tree: TreeNode = {
     name: "",
     path: "",
@@ -17,47 +22,108 @@ let tree: TreeNode = {
     url: "",
     children: {},
 };
-let content = "# Hello world";
-const file = Astro.url.searchParams.get("file");
+let fileObj: FileItem = {
+    fileType: "string",
+    name: "",
+    path: "",
+    type: "tree",
+    content: "",
+};
+const file = getFileParam(Astro);
+let filePaths: string[] = [];
+let repo;
 
 try {
-    const repo = await ghApp.getRepo(slug ? slug : "");
-    const settings = await ghApp.getSettingsFile(repo);
+    repo = await ghApp.getRepo(slug ? slug : "");
+    const settings = await ghApp.getSettings(repo);
     if (settings === undefined) {
         return Astro.redirect(`/account/repo/${slug}/settings`);
     }
+    inputs = settings.frontMatterFields;
     tree = await ghApp.getTree(repo);
     const flatTree = await ghApp.getFlatTree(repo);
+    filePaths = flatTree.map((item) => item.path);
     const fileItem = flatTree.find((item) => item.path === file);
     if (fileItem) {
-        content = await ghApp
-            .getFileContent(fileItem, repo)
-            .then((file) => file.content);
+        fileObj = await ghApp.getFileContent(fileItem, repo);
     }
 } catch (error) {
+    console.log("error", error);
     return Astro.redirect("/404");
 }
 
 if (Astro.request.method === "POST") {
-    try {
-        // const data = await Astro.request.formData();
-        // const repo = data.get("repo");
-        // console.log("seleccted repo is", repo);
-        // Do something with the data
-    } catch (error) {
-        if (error instanceof Error) {
-            console.error(error.message);
+    if (user && repo) {
+        try {
+            console.log("______________POST_________");
+            const data = await Astro.request.formData();
+            let tempEdits: {
+                content: string;
+                frontMater: Record<string, any>;
+            } = {
+                content: data.get("content") as string,
+                frontMater: {},
+            };
+            [...data.keys()]
+                .filter((key) => key.startsWith("frontMatterFields"))
+                .forEach((key) => {
+                    const inputData = data.get(key);
+                    const split = key.split("-");
+                    const realKey = split[split.length - 1];
+                    let tempData = `${data.get(key)}`;
+                    tempData = tempData.trim();
+                    if (realKey.startsWith("array")) {
+                        const arrayKeyParts = realKey.split("_");
+                        const arrayKey =
+                            arrayKeyParts[arrayKeyParts.length - 1];
+                        if (tempEdits.frontMater.hasOwnProperty(arrayKey)) {
+                            tempEdits.frontMater[arrayKey].push(tempData);
+                        } else {
+                            tempEdits.frontMater[arrayKey] = [tempData];
+                        }
+                    } else {
+                        try {
+                            tempData = JSON.parse(tempData);
+                        } catch (error) {}
+                        tempEdits.frontMater[realKey] = tempData;
+                    }
+                });
+            const newFile = `---\n${YAML.stringify(tempEdits.frontMater)}\n---\n${tempEdits.content}`;
+            let saveFile = { ...fileObj };
+            saveFile.content = newFile;
+            fileObj.content = saveFile.content;
+            await ghApp.pushFile(
+                `CMS edit to ${fileObj.name}`,
+                user.email,
+                user.name,
+                fileObj,
+                repo,
+            );
+            return Astro.redirect(Astro.url.pathname + "?saved=true");
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(error.message);
+            }
         }
     }
 }
 ---
 
-<Layout>
+<AccountLayout>
     <div class="grid grid-cols-8 gap-4">
         <h2 class="text-2xl col-span-8">{slug}</h2>
-        <Tree tree={tree} className="col-span-2" />
+        <div class="col-span-2 max-h-[85vh] overflow-y-auto">
+            <Tree tree={tree} className="" />
+        </div>
         <div id="editparent" class="col-span-6">
-            <EditView content={content} className="" />
+            <EditView
+                content={fileObj.content}
+                className=""
+                frontmatter={fileObj.frontMatter ? fileObj.frontMatter : {}}
+                inputs={inputs}
+                filePaths={filePaths}
+                fileType={fileObj.fileType}
+            />
         </div>
     </div>
-</Layout>
+</AccountLayout>

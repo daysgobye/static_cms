@@ -1,5 +1,12 @@
+---
+interface Props {
+    fullWidth?: boolean;
+}
+const { fullWidth } = Astro.props;
+---
+
 <div class="flex justify-center flex-1">
-    <main class="w-full max-w-screen-xl">
+    <main class={`w-full ${fullWidth ? "pl-4 pr-4" : "max-w-screen-xl"}`}>
         <slot />
     </main>
 </div>

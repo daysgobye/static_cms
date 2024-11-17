@@ -1,0 +1,40 @@
+---
+const { slug } = Astro.params;
+const { pathname } = Astro.url;
+let links = [
+    {
+        title: "Select Repo",
+        link: "/account/repo",
+    },
+];
+if (slug) {
+    links = [
+        ...links,
+        {
+            title: "Blog Settings ",
+            link: `/account/repo/${slug}/settings`,
+        },
+        {
+            title: `Edit ${slug}`,
+            link: `/account/repo/${slug}`,
+        },
+    ];
+}
+---
+
+<div class="breadcrumbs text-sm">
+    <ul>
+        {
+            links.map((link) => (
+                <li>
+                    <a
+                        class={`${pathname === link.link ? "underline underline-offset-8 text-accent" : ""} text-lg`}
+                        href={link.link}
+                    >
+                        {link.title}
+                    </a>
+                </li>
+            ))
+        }
+    </ul>
+</div>

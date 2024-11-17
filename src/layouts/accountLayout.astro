@@ -3,6 +3,8 @@ import Content from "@components/layout/content.astro";
 import Footer from "@components/layout/footer.astro";
 import Nav from "@components/layout/nav.astro";
 import BaseLayout from "./baseLayout.astro";
+import AccountBreadcrumbs from "@components/accountBreadcrumbs.astro";
+import Toast from "@components/common/toast.astro";
 
 // const { title, meta, structuredData, lang = "en" } = Astro.props;
 
@@ -17,7 +19,10 @@ import BaseLayout from "./baseLayout.astro";
 <BaseLayout>
     <div class="min-h-screen flex flex-col">
         <Nav />
-        <Content>
+        <Content fullWidth>
+            <AccountBreadcrumbs />
+            <Toast />
+
             <slot />
         </Content>
         <Footer />

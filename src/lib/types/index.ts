@@ -10,6 +10,10 @@ export type FrontMatterField = {
     input: FrontMatterFieldInput
 }
 export type SettingsFile = {
+    // wysiwyg:bool
+    // handleFrontmatter:bool
+    // websiteUrl:bool
+
     newFileType: '.md' | '.mdx'
     frontMatterFields: FrontMatterField[]
 }
