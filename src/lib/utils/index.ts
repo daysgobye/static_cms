@@ -1,6 +1,8 @@
 import type { AstroGlobal } from "astro"
 import type { AstroComponentFactory } from "astro/runtime/server/index.js"
 
+type AstroType = Readonly<AstroGlobal<Record<string, any>, AstroComponentFactory, Record<string, string | undefined>>>
+
 export const makeUrlSafe = (str: string) => {
     return str.replaceAll("/", "<bs>").replaceAll(".", "<dot>").replaceAll(" ", "<spc>")
 }
@@ -8,8 +10,8 @@ export const makeUrlUnSafe = (str: string) => {
     return str.replaceAll("<bs>", "/").replaceAll("<dot>", ".").replaceAll("<spc>", " ")
 }
 
-export const getFileParam = (Astro: Readonly<AstroGlobal<Record<string, any>, AstroComponentFactory, Record<string, string | undefined>>>) => {
-    const rawFile = Astro.url.searchParams.get("file");
+export const getParam = (name: string, Astro: AstroType) => {
+    const rawFile = Astro.url.searchParams.get(name);
     if (rawFile) {
         return makeUrlUnSafe(rawFile)
     }
@@ -17,7 +19,14 @@ export const getFileParam = (Astro: Readonly<AstroGlobal<Record<string, any>, As
         return undefined
     }
 }
-export const getPathParam = (Astro: Readonly<AstroGlobal<Record<string, any>, AstroComponentFactory, Record<string, string | undefined>>>): string[] => {
+
+export const getFileParam = (Astro: AstroType) => {
+    return getParam("file", Astro)
+}
+export const getSelectedPathParam = (Astro: AstroType) => {
+    return getParam("selectedpath", Astro)
+}
+export const getPathParam = (Astro: AstroType): string[] => {
     const raw = Astro.url.searchParams.getAll("path");
 
     if (raw) {
@@ -27,6 +36,7 @@ export const getPathParam = (Astro: Readonly<AstroGlobal<Record<string, any>, As
         return []
     }
 }
+
 
 
 export const toBinary = (str: string) => {
@@ -40,3 +50,14 @@ export const fromBinary = (str: string) => {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
     }).join(''))
 }
+export const getCurrentUrl = (Astro: AstroType, paramToAdd?: { key: string, value: string }): string => {
+    const { url } = Astro.request; // Get the current URL from the Astro request
+    const currentUrl = new URL(url); // Create a URL object for easy manipulation
+
+    if (paramToAdd) {
+        // Add or update the query parameter
+        currentUrl.searchParams.set(paramToAdd.key, paramToAdd.value);
+    }
+
+    return currentUrl.toString(); // Return the updated URL as a string
+};

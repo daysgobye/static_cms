@@ -1,0 +1,92 @@
+---
+import { GhApp, type FileItem } from "@lib/github";
+import { getCurrentUrl, getSelectedPathParam, makeUrlSafe } from "@lib/utils";
+
+export const partial = true;
+
+const newPath = getSelectedPathParam(Astro);
+const user = Astro.locals.user;
+const { slug } = Astro.params;
+//@ts-ignore
+const ghApp = new GhApp(user.installId);
+
+if (
+    Astro.request.method === "POST" &&
+    !Astro.request.headers.get("hx-request")
+) {
+    if (user && newPath) {
+        try {
+            const repo = await ghApp.getRepo(slug ? slug : "");
+            const settings = await ghApp.getSettings(repo);
+            if (settings === undefined) {
+                return Astro.redirect(`/account/repo/${slug}/settings`);
+            }
+            const data = await Astro.request.formData();
+            const fileName = data.get("file-name") as string;
+            const fileType = data.get("file-type") as string;
+            const redirectUrl = new URL(
+                `${Astro.url.origin}/account/repo/${slug}?saved=true`,
+            );
+            let _ = ["root", ...newPath.split("/")].forEach((part) => {
+                redirectUrl.searchParams.append("path", part);
+            });
+            const wholeFileName = `${fileName}${fileType}`;
+            redirectUrl.searchParams.set(
+                "file",
+                makeUrlSafe(`${newPath}/${wholeFileName}`),
+            );
+            let fileObj: FileItem = {
+                fileType: "string",
+                name: wholeFileName,
+                path: `${newPath}/${wholeFileName}`,
+                type: "blob",
+                content: `---\n \n---\n `,
+            };
+            await ghApp.pushFile(
+                `CMS created new file ${fileObj.name}`,
+                user.email,
+                user.name,
+                fileObj,
+                repo,
+            );
+            // console.log(fileObj);
+            return Astro.redirect(redirectUrl.toString());
+        } catch (error) {
+            console.log("error in file upload", error);
+            return Astro.redirect(
+                `${Astro.url.origin}/account/repo/${slug}?error=true`,
+            );        }
+    }
+}
+---
+
+<>
+    <h3 class="text-lg font-bold mb-4">
+        Create a new MarkdownFile at /{newPath}
+    </h3>
+    <form action={getCurrentUrl(Astro)} method="POST" class="flex flex-col">
+        <div class="join">
+            <input
+                name={`file-name`}
+                required
+                type="text"
+                placeholder="File Name"
+                class="input input-bordered w-full max-w-xs join-item"
+            />
+            <select
+                required
+                name="file-type"
+                class="select select-bordered w-full max-w-xs join-item"
+            >
+                <option disabled selected>New FileType</option>
+                <option value=".md">.md</option>
+                <option value=".mdx">.mdx</option>
+            </select>
+        </div>
+        <input
+            class="btn btn-active btn-primary mt-4 max-w-[50%]"
+            type="submit"
+            value="Create"
+        />
+    </form>
+</>

@@ -2,24 +2,95 @@
 import Spacer from "@components/common/spacer.astro";
 import Faq from "@components/home/faq.astro";
 import HeroBtns from "@components/home/heroBtns.astro";
-import Pricing from "@components/common/pricing/index.astro";
 import Layout from "@layouts/layout.astro";
 import { getProducts } from "@lib/lemonSqueezy/utils";
 const plans = await getProducts();
 ---
 
 <Layout>
+  <Spacer />
   <HeroBtns />
   <Spacer />
   <Faq />
   <Spacer />
 
+  <section class="bg-base-200 p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-bold text-center mb-4">Project Future</h2>
+    <p class="text-center text-base-content mb-6">
+      We&#39;re currently in <span class="font-bold">beta</span>, testing the
+      waters to see if this idea resonates with users like you. Our mission is
+      to make managing content for static site generators as effortless and
+      accessible as possible. If we gain traction, here&#39;s what we&#39;re
+      excited to build next:
+    </p>
+    <ul class="space-y-4">
+      <li>
+        <h3 class="text-lg font-semibold">Editor-Only Accounts</h3>
+        <p class="text-base-content">
+          Repo owners will be able to invite editors with restricted access.
+          Editors can log in using a simple email and password, and only edit
+          markdown files in specified paths or repos.
+        </p>
+      </li>
+      <li>
+        <h3 class="text-lg font-semibold">GitHub Templates for Easy Setup</h3>
+        <p class="text-base-content">
+          Provide ready-to-use GitHub repository templates for popular static
+          site generators. These templates will include pre-configured GitHub
+          Actions for seamless GitHub Pages builds, making it even easier to get
+          started.
+        </p>
+      </li>
+
+      <li>
+        <h3 class="text-lg font-semibold">Support for Additional File Types</h3>
+        <p class="text-base-content">
+          Expand editing capabilities to include other formats like HTML, JSON,
+          or custom file types, ensuring flexibility for diverse projects.
+        </p>
+      </li>
+      <li>
+        <h3 class="text-lg font-semibold">Custom Subdomains for Easy Access</h3>
+        <p class="text-base-content">
+          Manage your content more efficiently with a personalized subdomain,
+          e.g., <code>&lt;name&gt;.example.com</code>. Quickly access your
+          dashboard and start editing your files.
+        </p>
+      </li>
+      <li>
+        <h3 class="text-lg font-semibold">AI Tools for Content</h3>
+        <p class="text-base-content">
+          Seamlessly integrated AI features to help you create and improve your
+          content:
+        </p>
+        <ul class="list-disc list-inside pl-4">
+          <li>
+            <span class="font-medium">AI Checker:</span> Analyze your writing to
+            ensure it meets high-quality standards and doesn&#39;t appear obviously
+            AI-generated, helping you maintain authenticity and professionalism.
+          </li>
+
+          <li>
+            <span class="font-medium">AI Writer:</span> Generate content ideas or
+            drafts with ease.
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p class="text-center text-base-content mt-6">
+      We&#39;re building this tool with your feedback in mind—so let us know
+      what features you&#39;d like to see! Your support helps shape the future
+      of this project.
+    </p>
+  </section>
+
+  <!-- 
   <Pricing
     plans={plans.map((plan) => ({
       ...plan,
       cta: "Sign up",
       ctaLink: "/signup",
     }))}
-  />
+  /> -->
   <Spacer />
 </Layout>

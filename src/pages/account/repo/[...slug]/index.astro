@@ -1,5 +1,6 @@
 ---
 import EditView from "@components/common/editView.astro";
+import Modal from "@components/common/modal.astro";
 import Tree from "@components/common/tree.astro";
 import AccountLayout from "@layouts/accountLayout.astro";
 import { GhApp, type FileItem, type TreeNode } from "@lib/github";
@@ -48,14 +49,13 @@ try {
         fileObj = await ghApp.getFileContent(fileItem, repo);
     }
 } catch (error) {
-    console.log("error", error);
+    console.log("________________error", error);
     return Astro.redirect("/404");
 }
 
 if (Astro.request.method === "POST") {
     if (user && repo) {
         try {
-            console.log("______________POST_________");
             const data = await Astro.request.formData();
             let tempEdits: {
                 content: string;
@@ -93,10 +93,10 @@ if (Astro.request.method === "POST") {
             saveFile.content = newFile;
             fileObj.content = saveFile.content;
             await ghApp.pushFile(
-                `CMS edit to ${fileObj.name}`,
+                `CMS edit to ${saveFile.name}`,
                 user.email,
                 user.name,
-                fileObj,
+                saveFile,
                 repo,
             );
             return Astro.redirect(Astro.url.pathname + "?saved=true");
@@ -110,9 +110,22 @@ if (Astro.request.method === "POST") {
 ---
 
 <AccountLayout>
-    <div class="grid grid-cols-8 gap-4">
-        <h2 class="text-2xl col-span-8">{slug}</h2>
-        <div class="col-span-2 max-h-[85vh] overflow-y-auto">
+    <style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+    </style>
+    <div class="grid grid-cols-8 gap-4 pb-4">
+        <div
+            class="col-span-2 max-h-[80vh] rounded-box overflow-y-auto no-scrollbar"
+        >
             <Tree tree={tree} className="" />
         </div>
         <div id="editparent" class="col-span-6">
@@ -126,4 +139,5 @@ if (Astro.request.method === "POST") {
             />
         </div>
     </div>
+    <Modal />
 </AccountLayout>

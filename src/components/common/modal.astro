@@ -1,0 +1,54 @@
+---
+
+---
+
+<>
+    <script>
+        const handleFileUpload = async (event: any, targetId: string) => {
+            const file = event.target.files[0]; // Get the uploaded file
+            if (file) {
+                const reader = new FileReader();
+                const hidden = document.getElementById(
+                    targetId,
+                ) as HTMLInputElement;
+                reader.onload = (e: any) => {
+                    // base64Image = btoa(e.target.result);
+                    // base64Image = e.target.result; // Set the Base64 string
+
+                    hidden.value = e.target.result;
+                    // console.log("base", base64Image);
+                };
+                reader.readAsDataURL(file); // Convert file to Base64
+            } else {
+                console.log("error", file);
+            }
+        };
+
+        //@ts-ignore
+        if (!window.flatCms) {
+            //@ts-ignore
+            window.flatCms = {};
+        }
+        //@ts-ignore
+        window.flatCms.fileUploadHandler = handleFileUpload;
+        const modal = document.querySelector("#mainModal") as HTMLDialogElement;
+        //@ts-ignore
+        htmx.on("htmx:afterSwap", function (evt) {
+            const eventIdTarget = evt["target"].id;
+            if (eventIdTarget === "modal-body") {
+                modal.showModal();
+            }
+        });
+    </script>
+    <dialog id={`mainModal`} class="modal">
+        <div class="modal-box min-h-min">
+            <div class="" id="modal-body"></div>
+
+            <div class="">
+                <form method="dialog" class="absolute bottom-6 right-6">
+                    <button class="btn">Cancle</button>
+                </form>
+            </div>
+        </div>
+    </dialog>
+</>

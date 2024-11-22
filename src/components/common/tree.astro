@@ -5,8 +5,9 @@ import { getPathParam, makeUrlSafe } from "@lib/utils";
 interface Props {
     tree: TreeNode;
     className?: string;
+    sub?: boolean;
 }
-const { tree, className } = Astro.props;
+const { tree, className, sub } = Astro.props;
 const openPaths = getPathParam(Astro);
 let fileIcon = "bxs-file-blank";
 const fileExt = tree.name.split(".");
@@ -65,8 +66,6 @@ switch (fileExt[fileExt.length - 1]) {
             paramValue: string,
         ) => {
             const url = `${basseUrl}?${addToUrlParams(paramKey, paramValue)}`;
-            console.log(url);
-
             return url;
         };
 
@@ -80,26 +79,54 @@ switch (fileExt[fileExt.length - 1]) {
         //@ts-ignore
         window.flatCms.buildUrl = buildUrl;
     </script>
+
     {
         tree.type === "tree" ? (
-            <div class={`ml-4	 ${className}`}>
+            <div
+                class={` bg-base-200 rounded-box	pl-4 ${className} ${!sub ? "mb-4  p-2" : ""}`}
+            >
                 <div
                     x-data={`{ activeAccordion: ${openPaths.includes(tree.name)} }`}
                     class=""
                 >
-                    <button
-                        x-on:click={`activeAccordion = !activeAccordion; window.history.replaceState(null,undefined,'?'+window.flatCms.addToUrlParams("path",'${tree.name}',!activeAccordion))`}
-                        class="text-lg"
-                    >
-                        <template x-if="activeAccordion">
-                            <i class="text-xl bx bxs-folder-open pr-2" />{" "}
-                        </template>
-                        <template x-if="!activeAccordion">
-                            <i class="text-xl bx bxs-folder pr-2" />{" "}
-                        </template>
-                        {tree.name}
-                    </button>
+                    {" "}
+                    <div class="flex  justify-between">
+                        <button
+                            x-on:click={`activeAccordion = !activeAccordion; window.history.replaceState(null,undefined,'?'+window.flatCms.addToUrlParams("path",'${tree.name}',!activeAccordion))`}
+                            class="text-lg "
+                        >
+                            <template x-if="activeAccordion">
+                                <i class="text-xl bx bxs-folder-open pr-2" />{" "}
+                            </template>
+                            <template x-if="!activeAccordion">
+                                <i class="text-xl bx bxs-folder pr-2" />{" "}
+                            </template>
+                            {tree.name}
+                        </button>
+                        <div class="">
+                            <button
+                                hx-post={`${Astro.url.pathname}/partials/modal/new?selectedpath=${makeUrlSafe(tree.path)}`}
+                                hx-trigger="click"
+                                hx-target="#modal-body"
+                                hx-swap="innerHTML"
+                                class="tooltip tooltip-left mr-2"
+                                data-tip="create new file"
+                            >
+                                <i class="text-xl bx bxs-file-plus" />
+                            </button>
 
+                            <button
+                                hx-post={`${Astro.url.pathname}/partials/modal/upload?selectedpath=${makeUrlSafe(tree.path)}`}
+                                hx-trigger="click"
+                                hx-target="#modal-body"
+                                hx-swap="innerHTML"
+                                class="tooltip tooltip-left mr-2"
+                                data-tip="upload file"
+                            >
+                                <i class="text-xl bx bx-upload" />
+                            </button>
+                        </div>
+                    </div>
                     <div
                         x-cloak
                         x-collapse
@@ -108,7 +135,7 @@ switch (fileExt[fileExt.length - 1]) {
                     >
                         {tree.type === "tree" && tree.children
                             ? Object.values(tree.children).map((child) => (
-                                  <Astro.self tree={child} />
+                                  <Astro.self tree={child} sub />
                               ))
                             : ""}
                     </div>
@@ -118,7 +145,7 @@ switch (fileExt[fileExt.length - 1]) {
             <div class={`ml-4 ${className}`}>
                 <button
                     class="text-lg	"
-                    x-on:click={`   htmx.ajax('POST', window.flatCms.buildUrl('${Astro.url.pathname}/partials/clickedfile','file','${makeUrlSafe(tree.path)}'), {target:'#contentSwap', swap:'outerHTML'})`}
+                    x-on:click={`htmx.ajax('POST', window.flatCms.buildUrl('${Astro.url.pathname}/partials/clickedfile','file','${makeUrlSafe(tree.path)}'), {target:'#contentSwap', swap:'outerHTML'})`}
                 >
                     <i class={`text-xl bx ${fileIcon} pr-2`} /> {tree.name}
                 </button>

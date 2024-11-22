@@ -265,10 +265,10 @@ Q6ph5eGuGCuyOjj+qAWyk1YOqVrt5ozwQHtxs70fv7dQpxF6ED9k
             throw new Error("repo undefined")
         }
     }
-    async pushFile(message: string, email: string, name: string, fileItem: FileItem, repo: Awaited<ReturnType<typeof this.getRepo>>) {
+    async pushFile(message: string, email: string, name: string, fileItem: FileItem, repo: Awaited<ReturnType<typeof this.getRepo>>, isBinary?: boolean) {
         if (repo) {
             const octokit = await this.getOctoKit(),
-                content = toBinary(fileItem.content)
+                content = isBinary ? fileItem.content : toBinary(fileItem.content)
             let requestData = {
                 owner: repo.owner.login,
                 repo: repo.name,

@@ -32,7 +32,7 @@ const error = Astro.url.searchParams.get("error");
         saved === "true" && (
             <div
                 role="alert"
-                class="alert alert-success"
+                class="alert alert-success mb-4"
                 x-data="{ show: true }"
                 x-show="show"
                 x-init={`setTimeout(() => {show = false;window.history.replaceState(null,undefined,'?'+window.flatCms.removeParams("saved"))}, 7000)`}
@@ -58,7 +58,7 @@ const error = Astro.url.searchParams.get("error");
         error === "true" && (
             <div
                 role="alert"
-                class="alert alert-error"
+                class="alert alert-error mb-4"
                 x-data="{ show: true }"
                 x-show="show"
                 x-init={`setTimeout(() => {show = false;window.history.replaceState(null,undefined,'?'+window.flatCms.removeParams("error"))}, 7000)`}
