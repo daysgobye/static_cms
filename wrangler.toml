@@ -28,6 +28,7 @@ LEMON_SQUEEZY_STORE_ID = "125811"
 binding = "DB"
 database_id = "d23e8a5a-a2d7-4092-a556-b9e7c7b421c1"
 database_name = "flatcms"
+migrations_dir = "drizzle/"
 
 # MY_VARIABLE = "production_value"
 

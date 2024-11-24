@@ -22,12 +22,14 @@ if (Astro.request.method === "POST") {
 ---
 
 <AccountLayout>
-    <h2>select repo</h2>
-    <form method="post">
-        <select class="select select-bordered w-full max-w-xs" name="repo">
-            <option disabled selected>Select repo</option>
-            {repos.map((repo) => <option>{repo.name}</option>)}
-        </select>
-        <input type="submit" value="Select" class="btn" />
-    </form>
+    <p>
+        Thank you for trying our beta! Theres nothing here yet we will add
+        options to manage your editor accounts here
+    </p>
+
+    <a href="/account/repo">
+        <span class="flex">
+            for now {" "}<h2 class="text-xl text-primary pl-2">Go Edit</h2>
+        </span>
+    </a>
 </AccountLayout>

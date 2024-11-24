@@ -11,7 +11,6 @@ if (Astro.request.method === "POST") {
     try {
         const data = await Astro.request.formData();
         const repo = data.get("repo");
-        console.log("going to", repo);
         return Astro.redirect(`/account/repo/${repo}`);
     } catch (error) {
         if (error instanceof Error) {

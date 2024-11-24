@@ -49,8 +49,7 @@ try {
         fileObj = await ghApp.getFileContent(fileItem, repo);
     }
 } catch (error) {
-    console.log("________________error", error);
-    return Astro.redirect("/404");
+    return Astro.redirect("/account/repo?error=true");
 }
 
 if (Astro.request.method === "POST") {
