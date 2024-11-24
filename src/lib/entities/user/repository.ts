@@ -1,4 +1,4 @@
-import type { DbType } from "@lib/db";
+import { DbType } from "@lib/runtime/types";
 import { BaseRepository } from "../utils/repository";
 import { user, type UserPlan, type UserRoll } from "./schema";
 import { eq } from "drizzle-orm";

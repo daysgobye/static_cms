@@ -3,8 +3,6 @@ import Spacer from "@components/common/spacer.astro";
 import Faq from "@components/home/faq.astro";
 import HeroBtns from "@components/home/heroBtns.astro";
 import Layout from "@layouts/layout.astro";
-import { getProducts } from "@lib/lemonSqueezy/utils";
-const plans = await getProducts();
 ---
 
 <Layout>
@@ -25,11 +23,14 @@ const plans = await getProducts();
     </p>
     <ul class="space-y-4">
       <li>
-        <h3 class="text-lg font-semibold">Editor-Only Accounts</h3>
+        <h3 class="text-lg font-semibold">Editor-Only Accounts for Agencies</h3>
         <p class="text-base-content">
-          Repo owners will be able to invite editors with restricted access.
-          Editors can log in using a simple email and password, and only edit
-          markdown files in specified paths or repos.
+          Perfect for agencies looking to offer clients a simple content editing
+          solution. Repo owners can invite clients as editors with restricted
+          access, allowing them to log in with a simple email and password.
+          Editors can easily update markdown files in specified paths or repos,
+          enabling you to deliver super-fast and easy-to-maintain static sites
+          while keeping full control over the code.
         </p>
       </li>
       <li>
@@ -78,7 +79,7 @@ const plans = await getProducts();
       </li>
     </ul>
     <p class="text-center text-base-content mt-6">
-      We&#39;re building this tool with your feedback in mind—so let us know
+      We&#39;re building this tool with your feedback in mind so let us know
       what features you&#39;d like to see! Your support helps shape the future
       of this project.
     </p>

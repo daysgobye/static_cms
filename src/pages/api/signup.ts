@@ -1,8 +1,10 @@
 import { lucia } from "@lib/auth";
 import type { APIContext } from "astro";
-import db from "@lib/db";
 import UserRepository from "@lib/entities/user/repository";
-import { getHashPassword, isValidEmail } from "@lib/auth/utils";
+import { isValidEmail } from "@lib/auth/utils";
+import appRunTime from "@lib/runtime";
+const db = appRunTime.db
+const hash = appRunTime.hash
 
 export async function POST(context: APIContext): Promise<Response> {
     const userRepository = new UserRepository(db)
@@ -27,7 +29,6 @@ export async function POST(context: APIContext): Promise<Response> {
             status: 400
         });
     }
-    const hash = getHashPassword()
     const passwordHash = await hash(password);
     const newUser = await userRepository.create({
         email,

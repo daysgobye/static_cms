@@ -1,5 +1,5 @@
+import { DbType } from "@lib/runtime/types";
 import { eq, sql } from "drizzle-orm";
-import { type DbType } from "../../db";
 
 import { type AnySQLiteTable } from "drizzle-orm/sqlite-core";
 

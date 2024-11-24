@@ -1,9 +1,10 @@
 import { lucia } from "@lib/auth";
-import { getVerifyPassword, isValidEmail } from "@lib/auth/utils";
-import db from "@lib/db";
+import { isValidEmail } from "@lib/auth/utils";
 import UserRepository from "@lib/entities/user/repository";
 import type { APIContext } from "astro";
-
+import appRunTime from "@lib/runtime";
+const db = appRunTime.db
+const verify = appRunTime.verify
 export async function POST(context: APIContext): Promise<Response> {
     const userRepository = new UserRepository(db)
     const formData = await context.request.formData();
@@ -37,7 +38,6 @@ export async function POST(context: APIContext): Promise<Response> {
             status: 400
         });
     }
-    const verify = getVerifyPassword()
     const validPassword = await verify(existingUser.password_hash, password);
     if (!validPassword) {
         return new Response("Incorrect username or password", {

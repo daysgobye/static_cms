@@ -1,7 +1,6 @@
 import { text, sqliteTable, integer } from "drizzle-orm/sqlite-core";
 import { schemaDefaults } from "../utils/schemaDefaults";
 import { generateIdFromEntropySize } from "lucia";
-import { InferEntrySchema } from "astro:content";
 export type UserRoll = 3 | 2 | 1
 export type UserPlan = "Free" | "Base" | "Pro" | null
 export const user = sqliteTable("user", {

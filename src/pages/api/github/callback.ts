@@ -2,16 +2,15 @@ import type { APIContext } from "astro";
 import type { OAuth2Tokens } from "arctic";
 import { github } from "@lib/auth/oauth";
 import UserRepository from "@lib/entities/user/repository";
-import db from "@lib/db";
 import { lucia } from "@lib/auth";
-
+import appRunTime from "@lib/runtime";
+const db = appRunTime.db
 export async function GET(context: APIContext): Promise<Response> {
     const code = context.url.searchParams.get("code");
     const state = context.url.searchParams.get("state");
     const installationId = context.url.searchParams.get("installation_id");
     const storedState = context.cookies.get("github_oauth_state")?.value ?? null;
     const userRepository = new UserRepository(db)
-    console.log(storedState, state)
     if (code === null) {
         return new Response(null, {
             status: 400
@@ -82,7 +81,8 @@ export async function GET(context: APIContext): Promise<Response> {
         roll: 1,
         githubId: githubUserId,
         username: githubUsername,
-        name: githubUser.name
+        name: githubUser.name,
+        plan: "Free"
     })
     const session = await lucia.createSession(newUser.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);

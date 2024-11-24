@@ -1,0 +1,34 @@
+---
+interface Props {
+    head: string[];
+    rowNumber?: boolean;
+    rows: Record<string, any>[];
+}
+
+const { head, rowNumber, rows } = Astro.props;
+
+let renderHead = rowNumber ? ["", ...head] : head;
+---
+
+<div class="overflow-x-auto">
+    <table class="table table-zebra">
+        <!-- head -->
+        <thead>
+            <tr>
+                {renderHead.map((title) => <th>title</th>)}
+            </tr>
+        </thead>
+        <tbody>
+            {
+                rows.map((row, i) => (
+                    <tr>
+                        {rowNumber && <th>{i + 1}</th>}
+                        {Object.values(row).map((value) => {
+                            <td>{value}</td>;
+                        })}
+                    </tr>
+                ))
+            }
+        </tbody>
+    </table>
+</div>

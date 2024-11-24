@@ -1,10 +1,10 @@
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
 import { Lucia } from "lucia";
-import db from "../db";
 import { session } from "../entities/session/schema";
 import { user, type UserPlan, type UserRoll } from "../entities/user/schema";
 import { env } from "std-env";
-
+import appRunTime from "@lib/runtime";
+const db = appRunTime.db
 declare module "lucia" {
     interface Register {
         Lucia: typeof lucia;

@@ -14,17 +14,22 @@ const faq = [
         `,
     },
     {
+        q: "How is this different from Decap or similar tools?",
+        a: `Unlike most CMS tools, our platform doesn’t require any complex configuration for data ingestion. It’s a fully hosted, headless CMS that integrates directly with your GitHub repo. 
+        Similar tools like <a href="https://decapcms.org/" target="_blank" class="text-secondary-content underline">Decap</a> require setup or self-hosting, while we handle everything for you—just connect your repo, and you're all set.`,
+    },
+    {
         q: "Can I add it to my current site?",
-        a: `Absolutely! There's no setup required to make the CMS work with your existing GitHub-hosted site.`,
+        a: `Absolutely! As long as your site's code is hosted on GitHub, no setup is required to start using the CMS.`,
     },
     {
         q: "How long does it take to set up?",
         a: `Less than 1 minute. Just connect your GitHub repo, and you're ready to go.`,
     },
+
     {
-        q: "How is this different from Decap or similar tools?",
-        a: `Unlike most CMS tools, our platform doesn’t require any complex configuration for data ingestion. It’s a fully hosted, headless CMS that integrates directly with your GitHub repo. 
-        Similar tools like <a href="https://decapcms.org/" target="_blank" class="text-secondary-content underline">Decap</a> require setup or self-hosting, while we handle everything for you—just connect your repo, and you're all set.`,
+        q: "Does it work with private repositories?",
+        a: `Yes, of course! Your data can remain private. When you grant us access to your private GitHub repository, our CMS will still be able to read and edit your files securely, just like with public repos.`,
     },
     {
         q: "Do you save my data?",
@@ -70,7 +75,8 @@ const faq = [
                             {qa.q}
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 icon-expand transition-transform duration-200"
+                                class="h-6 w-6 icon-expand transition-transform duration-200
+                                text-accent"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
