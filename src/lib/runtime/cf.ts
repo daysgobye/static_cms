@@ -1,9 +1,6 @@
 import { drizzle } from 'drizzle-orm/d1';
-import { env } from "std-env";
-import { AppRuntime } from './types';
-const d1Binding = env.DB
-//@ts-ignore
-const db = drizzle(d1Binding);
+import { type AppRuntime } from './types';
+
 
 const workerHashPassword = async (
     password: string,
@@ -61,5 +58,10 @@ const workerVerifyPassword = async (
     return attemptHash === originalHash;
 }
 
-const appRunTime: AppRuntime = { verify: workerVerifyPassword, hash: workerHashPassword, db }
+const appRunTime = (context: any): AppRuntime => {
+    const env = context.locals.runtime.env
+    //@ts-ignore
+    const db = drizzle(env.DB);
+    return { verify: workerVerifyPassword, hash: workerHashPassword, db, env }
+}
 export default appRunTime

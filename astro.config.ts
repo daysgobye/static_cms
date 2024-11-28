@@ -33,22 +33,27 @@ export default defineConfig({
 
     //FIXME: change to your hosted url for other config see docs 
     // https://docs.astro.build/en/guides/integrations-guide/sitemap/#configuration
-    site: 'https://quicksass.build',
+    site: 'https://edithub.online/',
     security: {
         checkOrigin: true
     },
     output: 'server',
     //FIXME: default is set to node server, but you can comment out the node adapter and enable the cloudflair adapter
     // if you do so make sure to uncomment the import up top too
-    // adapter: cloudflare(),
-    adapter: node({
-        mode: 'standalone',
-    }),
-    // adapter: cloudflare({
-    //     platformProxy: {
-    //         enabled: true,
-    //     },
+    // adapter: node({
+    //     mode: 'standalone',
     // }),
+    adapter: cloudflare({
+        routes: {
+            extend: {
+                include: [], // Route a prerended page to the SSR function for on-demand rendering
+                exclude: [{ pattern: '/pagefind/*' }], // Use Starlight's pagefind search, which is generated statically at build time
+            }
+        },
+        platformProxy: {
+            enabled: true,
+        },
+    }),
     vite: {
         optimizeDeps: {
             exclude: ["astro:db"]

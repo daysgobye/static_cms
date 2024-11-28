@@ -1,13 +1,19 @@
 ---
 import { GhApp, type FileItem } from "@lib/github";
 import { getCurrentUrl, getSelectedPathParam, makeUrlSafe } from "@lib/utils";
+import appRunTime from "@lib/runtime";
+
 export const partial = true;
 
 const newPath = getSelectedPathParam(Astro);
 const user = Astro.locals.user;
 const { slug } = Astro.params;
-//@ts-ignore
-const ghApp = new GhApp(user.installId);
+const env = appRunTime(Astro).env;
+const ghApp = new GhApp(
+    //@ts-ignore
+    user.installId,
+    env,
+);
 
 if (
     Astro.request.method === "POST" &&
@@ -74,7 +80,7 @@ if (
                 class="file-input file-input-bordered w-full max-w-xs"
                 name="upload"
                 accept="image/*"
-                x-on:change.debounce="window.flatCms.fileUploadHandler($event,'imageBase64')"
+                x-on:change.debounce="window.edithub.fileUploadHandler($event,'imageBase64')"
             />
 
             <input id="imageBase64" type="hidden" name="imageBase64" />

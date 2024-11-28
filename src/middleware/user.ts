@@ -1,7 +1,9 @@
-import { lucia } from "@lib/auth";
+import { getLucia } from "@lib/auth";
 import { defineMiddleware } from "astro:middleware";
 
 export const user = defineMiddleware(async (context, next) => {
+    const lucia = getLucia(context)
+
     const sessionId = context.cookies.get(lucia.sessionCookieName)?.value ?? null;
     if (!sessionId) {
         context.locals.user = null;

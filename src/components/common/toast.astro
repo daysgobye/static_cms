@@ -21,12 +21,12 @@ const error = Astro.url.searchParams.get("error");
         };
 
         //@ts-ignore
-        if (!window.flatCms) {
+        if (!window.edithub) {
             //@ts-ignore
-            window.flatCms = {};
+            window.edithub = {};
         }
         //@ts-ignore
-        window.flatCms.removeParams = removeParams;
+        window.edithub.removeParams = removeParams;
     </script>
     {
         saved === "true" && (
@@ -35,7 +35,7 @@ const error = Astro.url.searchParams.get("error");
                 class="alert alert-success mb-4"
                 x-data="{ show: true }"
                 x-show="show"
-                x-init={`setTimeout(() => {show = false;window.history.replaceState(null,undefined,'?'+window.flatCms.removeParams("saved"))}, 7000)`}
+                x-init={`setTimeout(() => {show = false;window.history.replaceState(null,undefined,'?'+window.edithub.removeParams("saved"))}, 7000)`}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,7 @@ const error = Astro.url.searchParams.get("error");
                 class="alert alert-error mb-4"
                 x-data="{ show: true }"
                 x-show="show"
-                x-init={`setTimeout(() => {show = false;window.history.replaceState(null,undefined,'?'+window.flatCms.removeParams("error"))}, 7000)`}
+                x-init={`setTimeout(() => {show = false;window.history.replaceState(null,undefined,'?'+window.edithub.removeParams("error"))}, 7000)`}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"

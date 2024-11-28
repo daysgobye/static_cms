@@ -1,11 +1,15 @@
-import { lucia } from "@lib/auth";
+import { getLucia } from "@lib/auth";
 import { isValidEmail } from "@lib/auth/utils";
 import UserRepository from "@lib/entities/user/repository";
 import type { APIContext } from "astro";
 import appRunTime from "@lib/runtime";
-const db = appRunTime.db
-const verify = appRunTime.verify
+
 export async function POST(context: APIContext): Promise<Response> {
+    const appRT = appRunTime(context)
+    const db = appRT.db
+    const verify = appRT.verify
+    const lucia = getLucia(context)
+
     const userRepository = new UserRepository(db)
     const formData = await context.request.formData();
     const rawEmail = formData.get("email") as string;

@@ -1,8 +1,14 @@
-import { generateState } from "arctic";
+import appRunTime from "@lib/runtime";
+import { generateState, GitHub } from "arctic";
 import type { APIContext } from "astro";
-import { github } from "@lib/auth/oauth";
 
 export async function GET(context: APIContext): Promise<Response> {
+    const appRT = appRunTime(context)
+    const github = new GitHub(
+        appRT.env.GITHUB_CLIENT_ID,
+        appRT.env.GITHUB_CLIENT_SECRET,
+        null
+    );
     const state = generateState();
     const url = github.createAuthorizationURL(state, ["user:email"]);
 

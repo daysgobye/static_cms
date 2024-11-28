@@ -4,11 +4,17 @@ import Select from "@components/common/form/select.astro";
 import Text from "@components/common/form/text.astro";
 import AccountLayout from "@layouts/accountLayout.astro";
 import { GhApp, type FileItem } from "@lib/github";
+import appRunTime from "@lib/runtime";
 import type { SettingsFile } from "@lib/types";
 
 const user = Astro.locals.user;
-//@ts-ignore
-const ghApp = new GhApp(user.installId);
+const env = appRunTime(Astro).env;
+
+const ghApp = new GhApp(
+    //@ts-ignore
+    user.installId,
+    env,
+);
 const { slug } = Astro.params;
 let settings: SettingsFile = {
     newFileType: ".md",
@@ -72,7 +78,7 @@ try {
                       };
                 file.content = JSON.stringify(tempSettings);
                 await ghApp.pushFile(
-                    "changed Flat cms settings",
+                    "changed Edithub settings",
                     user.email,
                     user.name,
                     file,

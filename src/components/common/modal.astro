@@ -25,12 +25,12 @@
         };
 
         //@ts-ignore
-        if (!window.flatCms) {
+        if (!window.edithub) {
             //@ts-ignore
-            window.flatCms = {};
+            window.edithub = {};
         }
         //@ts-ignore
-        window.flatCms.fileUploadHandler = handleFileUpload;
+        window.edithub.fileUploadHandler = handleFileUpload;
         const modal = document.querySelector("#mainModal") as HTMLDialogElement;
         //@ts-ignore
         htmx.on("htmx:afterSwap", function (evt) {

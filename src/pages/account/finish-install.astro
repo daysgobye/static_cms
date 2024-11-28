@@ -1,11 +1,13 @@
 ---
 import Layout from "@layouts/layout.astro";
 import { GhApp } from "@lib/github";
+import appRunTime from "@lib/runtime";
 
 const user = Astro.locals.user;
 let installationUrl = "";
 if (user && user.githubId) {
-    const ghApp = new GhApp(1234);
+    const env = appRunTime(Astro).env;
+    const ghApp = new GhApp(1234, env);
     installationUrl = await ghApp.getInstallationUrl(user.githubId);
 }
 ---
@@ -17,7 +19,7 @@ if (user && user.githubId) {
             when you click the button below you will install the app and please
             select 'Only selected repos'
         </p>
-        <p>then select the repos you want to use with flat cms</p>
+        <p>then select the repos you want to use with Edithub</p>
         <a href={installationUrl}>
             <button class="btn btn-success"> install </button>
         </a>

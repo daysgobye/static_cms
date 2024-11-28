@@ -2,6 +2,7 @@
 import EditView from "@components/common/editView.astro";
 import FrontmatterEditor from "@components/common/form/frontmatterEditor.astro";
 import { GhApp, type FileItem } from "@lib/github";
+import appRunTime from "@lib/runtime";
 import type { FrontMatterField } from "@lib/types";
 import { getFileParam } from "@lib/utils";
 
@@ -17,8 +18,12 @@ let inputs: FrontMatterField[] = [];
 const file = getFileParam(Astro);
 const user = Astro.locals.user;
 const { slug } = Astro.params;
-//@ts-ignore
-const ghApp = new GhApp(user.installId);
+const env = appRunTime(Astro).env;
+const ghApp = new GhApp(
+    //@ts-ignore
+    user.installId,
+    env,
+);
 let filePaths: string[] = [];
 try {
     const repo = await ghApp.getRepo(slug ? slug : "");

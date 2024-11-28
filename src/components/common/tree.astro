@@ -70,14 +70,14 @@ switch (fileExt[fileExt.length - 1]) {
         };
 
         //@ts-ignore
-        if (!window.flatCms) {
+        if (!window.edithub) {
             //@ts-ignore
-            window.flatCms = {};
+            window.edithub = {};
         }
         //@ts-ignore
-        window.flatCms.addToUrlParams = appendToUrlParams;
+        window.edithub.addToUrlParams = appendToUrlParams;
         //@ts-ignore
-        window.flatCms.buildUrl = buildUrl;
+        window.edithub.buildUrl = buildUrl;
     </script>
 
     {
@@ -92,7 +92,7 @@ switch (fileExt[fileExt.length - 1]) {
                     {" "}
                     <div class="flex  justify-between">
                         <button
-                            x-on:click={`activeAccordion = !activeAccordion; window.history.replaceState(null,undefined,'?'+window.flatCms.addToUrlParams("path",'${tree.name}',!activeAccordion))`}
+                            x-on:click={`activeAccordion = !activeAccordion; window.history.replaceState(null,undefined,'?'+window.edithub.addToUrlParams("path",'${tree.name}',!activeAccordion))`}
                             class="text-lg "
                         >
                             <template x-if="activeAccordion">
@@ -145,7 +145,7 @@ switch (fileExt[fileExt.length - 1]) {
             <div class={`ml-4 ${className}`}>
                 <button
                     class="text-lg	"
-                    x-on:click={`htmx.ajax('POST', window.flatCms.buildUrl('${Astro.url.pathname}/partials/clickedfile','file','${makeUrlSafe(tree.path)}'), {target:'#contentSwap', swap:'outerHTML'})`}
+                    x-on:click={`htmx.ajax('POST', window.edithub.buildUrl('${Astro.url.pathname}/partials/clickedfile','file','${makeUrlSafe(tree.path)}'), {target:'#contentSwap', swap:'outerHTML'})`}
                 >
                     <i class={`text-xl bx ${fileIcon} pr-2`} /> {tree.name}
                 </button>

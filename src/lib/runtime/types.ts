@@ -11,4 +11,5 @@ export type AppRuntime = {
         passwordAttempt: string,
     ) => Promise<boolean>
     db: DbType
+    env: Record<string, string>
 }

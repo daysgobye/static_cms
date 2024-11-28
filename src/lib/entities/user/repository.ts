@@ -1,4 +1,4 @@
-import { DbType } from "@lib/runtime/types";
+import type { DbType } from "@lib/runtime/types";
 import { BaseRepository } from "../utils/repository";
 import { user, type UserPlan, type UserRoll } from "./schema";
 import { eq } from "drizzle-orm";
@@ -41,7 +41,6 @@ export default class UserRepository extends BaseRepository<typeof user> {
     async getByGitHubId(githubId: number) {
         const userByGhId = await this.db.select().from(user).where(eq(user.githubId, githubId));
         if (userByGhId[0]) {
-            console.log('got a user?', userByGhId)
             return userByGhId[0]
         }
         return undefined

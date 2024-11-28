@@ -2,7 +2,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3';
 //@ts-ignore
 import Database from 'better-sqlite3';
 import { verify, hash } from "@node-rs/argon2";
-import { AppRuntime } from './types';
+import type { AppRuntime } from './types';
 
 const hashPass = async (password: string) => hash(password, {
     // recommended minimum parameters
@@ -19,5 +19,6 @@ const verifyPass = async (storedHash: string, password: string) => verify(stored
 })
 const sqlite = new Database('sqlite.db');
 const db = drizzle(sqlite);
-const appRunTime: AppRuntime = { verify: verifyPass, hash: hashPass, db }
+//@ts-ignore
+const appRunTime = (context: any): AppRuntime => ({ verify: verifyPass, hash: hashPass, db, env: import.meta.env })
 export default appRunTime
